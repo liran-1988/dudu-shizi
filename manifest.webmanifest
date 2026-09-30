@@ -2,7 +2,7 @@
   "id": "./",
   "name": "嘟嘟识字",
   "short_name": "嘟嘟识字",
-  "description": "亲子陪伴的汉字兴趣小游戏，练习记录不等同于掌握。PWA：HTTPS 打开后可添加到主屏幕，进度本机保存，家长确认后更新。",
+  "description": "亲子陪伴的汉字兴趣小游戏。PWA 部署；手机请先点「点我开声音」。",
   "lang": "zh-CN",
   "start_url": "./index.html",
   "scope": "./",

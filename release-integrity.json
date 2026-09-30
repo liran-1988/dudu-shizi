@@ -1,19 +1,19 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "status": "pwa-candidate-awaiting-https-deploy",
   "channel": "pwa",
   "files": {
     "index.html": {
-      "bytes": 96772,
-      "sha256": "648654427cfa08887a308bd18fc11beaee24a32b7234f20cdac8d64b786c3bda"
+      "bytes": 97999,
+      "sha256": "89110f7d02c10e422948760b7c0231f58e3524f2e027f7b5a0deb7abc0e7d63d"
     },
     "manifest.webmanifest": {
-      "bytes": 696,
-      "sha256": "93d30e37888210ac8d57e33f0f5ee822df8a3dff91f6613cafd8411c54788b6b"
+      "bytes": 625,
+      "sha256": "9d1cebace524f3e33999dce4293c50b33c35974b29b4a0f528816507de354653"
     },
     "sw.js": {
       "bytes": 1193,
-      "sha256": "41561727ce5e22c479498015bdabb730caa9d0f8a5e69dff3fdfc31f9abb1075"
+      "sha256": "ada4d7a7250e147c83f0261c63e0b7f1a466cfc2a045c1fb9d59388afc72df1a"
     },
     "icons/icon-180.png": {
       "bytes": 1013,
@@ -28,8 +28,8 @@
       "sha256": "d32b1d66a1e95d7a34fc8dd639924276b69f30259273eac32b13f5827e95a804"
     },
     "发布说明.md": {
-      "bytes": 1765,
-      "sha256": "89eb16764d9b146f1370589db8740cf24d7f756c08b78f5d77af2dd786bc25ef"
+      "bytes": 3667,
+      "sha256": "0f2524aefd8eb51f6eef1508f9f764001cb4ed49a7b0ace58bc6a1e3f97e9033"
     },
     "说明.md": {
       "bytes": 1278,
@@ -38,10 +38,6 @@
     "移动发布审核与验收-1.1.2.md": {
       "bytes": 10176,
       "sha256": "6a3948ac9fcb536065d9a9014d93c43ecf2f5b3b7a9f1db1a89fcda0b8e9d952"
-    },
-    "版本说明-1.2.2.md": {
-      "bytes": 279,
-      "sha256": "426568e66d593f68f25ffb3d76fb4767d50218a656f731a81446d8a1211fdc00"
     }
   }
 }
