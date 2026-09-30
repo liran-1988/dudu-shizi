@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffefc9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="嘟嘟识字">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<title>嘟嘟识字 · 认字小游戏</title>
+<style>
+:root{
+  --hf:'KaiTi','STKaiti','Kaiti SC','AR PL UKai CN','TW-Kai','DFKai-SB',serif;
+  --ink:#4a3b2a; --accent:#ff7b54; --accent2:#ffb26b; --good:#3bb273; --card:#ffffff;
+}
+*{touch-action:manipulation; -webkit-tap-highlight-color:transparent; box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink); user-select:none; -webkit-user-select:none;
+  background:linear-gradient(160deg,#ffefc9 0%,#ffe0e9 55%,#e4f0ff 100%);
+  background-attachment:fixed; min-height:100dvh;
+}
+#app{max-width:600px;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(44px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));}
+.pause-cover{position:fixed;inset:0;z-index:100;background:#fff3e8f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center;}
+.pause-cover h2{font-size:26px;}
+.pause-cover .rbtn{flex:initial;width:min(100%,320px);padding:12px;}
+body.paused *,body.paused *::before{animation-play-state:paused!important;}
+.status-note{font-size:14px;line-height:1.6;margin-top:12px;color:#776750;}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important;}#confetti{display:none!important;}}
+@media (orientation:landscape) and (max-height:520px){.mascot{margin:6px 0;}.mascot .face{font-size:60px;}.menu{margin-top:12px;}.mbtn{min-height:80px;}.quiz-prompt{gap:4px;}.audio-btn{width:64px;height:64px;font-size:30px;}.big-emoji.pq{font-size:56px;}.opt{aspect-ratio:auto;min-height:100px;}.round-result{margin-top:20px;}}
+.hidden{display:none!important;}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;}
+button:active{transform:scale(.96);}
+
+/* ---------- 顶栏 ---------- */
+.topbar{display:flex;align-items:center;gap:10px;min-height:52px;}
+.topbar .back{width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(180,120,60,.18);font-size:24px;}
+.chip{background:#fff;border-radius:999px;padding:8px 16px;font-size:17px;font-weight:700;box-shadow:0 3px 8px rgba(180,120,60,.15);}
+.chip.stars{color:#e8a200;}
+.gear{margin-left:auto;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(180,120,60,.18);font-size:22px;}
+.spacer{flex:1;}
+
+/* ---------- 首页 ---------- */
+.mascot{display:flex;flex-direction:column;align-items:center;margin:18px 0 8px;}
+.mascot .face{font-size:96px;line-height:1.15;filter:drop-shadow(0 6px 6px rgba(180,120,60,.25));animation:breath 2.6s ease-in-out infinite;}
+@keyframes breath{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.bubble{position:relative;background:#fff;border-radius:18px;padding:10px 18px;font-size:18px;margin-top:8px;box-shadow:0 4px 10px rgba(180,120,60,.15);}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;}
+.mbtn{position:relative;border-radius:26px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:22px;font-weight:800;color:#fff;box-shadow:0 6px 14px rgba(180,120,60,.25);}
+.mbtn .mi{font-size:44px;line-height:1;}
+.mbtn.wide{grid-column:1/-1;min-height:96px;flex-direction:row;gap:16px;}
+.mbtn.learn{background:linear-gradient(135deg,#ff9a5a,#ff6b6b);}
+.mbtn.play{background:linear-gradient(135deg,#5ac8fa,#4d7dff);}
+.mbtn.rev{background:linear-gradient(135deg,#7bd88a,#2fae66);}
+.mbtn.wall{background:linear-gradient(135deg,#ffc93d,#ff9f1c);}
+.badge{position:absolute;top:-8px;right:-6px;background:#e84545;color:#fff;border-radius:999px;font-size:14px;font-weight:800;padding:3px 10px;font-style:normal;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+.badge:empty{display:none;}
+.tip{margin-top:16px;background:#fff7e0;border:2px dashed #f0b429;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6;}
+
+/* ---------- 学一学 ---------- */
+.learn-wrap{display:flex;flex-direction:column;align-items:center;margin-top:6px;}
+.learn-card{background:var(--card);border-radius:32px;box-shadow:0 10px 24px rgba(180,120,60,.22);padding:22px 26px 20px;width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.big-emoji{font-size:66px;line-height:1.2;}
+.big-hanzi{font-family:var(--hf);font-size:clamp(120px,36vw,190px);line-height:1.08;font-weight:700;}
+.pinyin{font-size:34px;font-weight:700;color:var(--accent);letter-spacing:2px;}
+.word{font-size:24px;color:#8a7a63;margin-top:2px;}
+.stroke-box{margin-top:14px;background:#fff;border-radius:20px;box-shadow:0 6px 16px rgba(180,120,60,.18);padding:8px;cursor:pointer;}
+.stroke-box svg{display:block;}
+.hint{font-size:13px;color:#a3947d;margin-top:6px;text-align:center;}
+.btnrow{display:flex;gap:14px;margin-top:20px;width:100%;max-width:430px;}
+.rbtn{flex:1;min-height:72px;border-radius:22px;font-size:22px;font-weight:800;background:#fff;box-shadow:0 5px 12px rgba(180,120,60,.2);color:var(--ink);}
+.rbtn.primary{background:linear-gradient(135deg,#ff9a5a,#ff6b6b);color:#fff;}
+.learn-progress{font-size:18px;font-weight:800;background:#fff;border-radius:999px;padding:6px 16px;box-shadow:0 3px 8px rgba(180,120,60,.15);}
+.done-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:12vh;text-align:center;}
+.done-wrap .big{font-size:80px;}
+.done-wrap h2{font-size:26px;}
+.pop{animation:pop .5s ease;}
+@keyframes pop{0%{transform:scale(.5);opacity:.2}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* ---------- 玩游戏 ---------- */
+.dots{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap;}
+.dots i{width:12px;height:12px;border-radius:50%;background:#ffffffaa;box-shadow:inset 0 0 0 2px #ffffff88;}
+.dots i.cur{background:#ff6b6b;}
+.dots i.done{background:#fff;}
+.quiz-prompt{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:10px;}
+.audio-btn{width:92px;height:92px;border-radius:50%;font-size:44px;background:#fff;box-shadow:0 6px 16px rgba(180,120,60,.25);animation:breath 2s ease-in-out infinite;}
+.qtext{font-size:20px;font-weight:700;color:#7a6a52;}
+.big-emoji.pq{font-size:96px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.opt{background:var(--card);border-radius:26px;aspect-ratio:1.25;display:flex;align-items:center;justify-content:center;font-family:var(--hf);font-size:clamp(64px,20vw,104px);font-weight:700;box-shadow:0 6px 14px rgba(180,120,60,.2);}
+.opt.right{background:#c9f2d5;box-shadow:0 0 0 4px var(--good) inset;animation:pop .5s;}
+.opt.wrong{animation:shake .45s;opacity:.35;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-7px)}80%{transform:translateX(5px)}}
+.round-result{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:9vh;text-align:center;}
+.round-result .stars{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:100%;font-size:40px;}
+.round-result .stars span{display:block;}
+.switchrow{gap:12px;}
+.switchrow>span{flex:1;}
+.switch{flex-shrink:0;}
+.round-result h2{font-size:26px;}
+#scr-quiz.done .quiz-body{display:none;}
+
+/* ---------- 成果墙 ---------- */
+.progress-line{height:16px;background:#ffffff99;border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(180,120,60,.2);}
+.progress-line>div{height:100%;background:linear-gradient(90deg,#ffd93d,#ff9f1c);border-radius:999px;transition:width .5s;}
+.wall-count{margin:10px 2px 14px;font-size:17px;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+.cell{background:#ffffff70;border-radius:18px;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.cell b{font-family:var(--hf);font-size:44px;font-weight:700;color:#b3a58e;}
+.cell span{font-size:12px;height:14px;}
+.cell.on{background:#fff;box-shadow:0 4px 10px rgba(180,120,60,.18);}
+.cell.on b{color:var(--ink);}
+.wall-done{text-align:center;margin:24px 0 8px;font-size:22px;font-weight:800;color:#e8720c;}
+
+/* ---------- 家长设置 ---------- */
+.set-block{background:#fff;border-radius:20px;padding:16px 18px;margin-top:14px;box-shadow:0 4px 12px rgba(180,120,60,.14);}
+.set-block h3{font-size:16px;margin-bottom:12px;color:#8a7a63;}
+.lvl-list{display:flex;flex-direction:column;gap:8px;}
+.lvl-opt{display:flex;align-items:center;gap:12px;border:2px solid #eee2cf;border-radius:14px;padding:10px 14px;font-size:18px;font-weight:700;background:#fffdf8;}
+.lvl-opt.sel{border-color:var(--accent);background:#fff2ea;}
+.lvl-opt .li{font-size:24px;}
+.lvl-opt .lp{margin-left:auto;color:#a3947d;font-size:15px;font-weight:600;}
+.switchrow{display:flex;align-items:center;justify-content:space-between;font-size:17px;font-weight:700;}
+.switch{position:relative;width:58px;height:32px;}
+.switch input{opacity:0;width:0;height:0;}
+.switch span{position:absolute;inset:0;background:#ddd;border-radius:999px;transition:.2s;}
+.switch span:before{content:"";position:absolute;width:26px;height:26px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25);}
+.switch input:checked+span{background:var(--good);}
+.switch input:checked+span:before{left:29px;}
+.raterow{display:flex;align-items:center;gap:12px;}
+.raterow input[type=range]{flex:1;accent-color:var(--accent);}
+.raterow button{background:#fff2ea;border-radius:12px;padding:10px 16px;font-size:16px;font-weight:700;}
+.danger button{width:100%;background:#ffecec;color:#d63031;border-radius:14px;padding:14px;font-size:17px;font-weight:800;}
+.foot{margin-top:16px;font-size:13px;color:#a3947d;line-height:1.6;text-align:center;}
+
+.mini-btn{background:#fff2ea;border-radius:12px;padding:8px 14px;font-size:15px;font-weight:700;}
+.set-block select{font-size:16px;padding:6px 12px;border-radius:10px;border:2px solid #eee2cf;background:#fff;font-weight:700;color:var(--ink);}
+.rest-tip{font-size:17px;color:#7a6a52;margin-top:4px;}
+.set-review{margin-top:10px;font-size:14px;color:#8a7a63;}
+.gear{transition:transform .2s, box-shadow .2s;}
+.gear-hold{transform:scale(1.18);box-shadow:0 0 0 5px rgba(255,178,107,.5);}
+
+/* ---------- 彩带 ---------- */
+#confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:99;}
+#confetti i{position:absolute;top:-24px;border-radius:3px;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(112vh) rotate(560deg);opacity:.85;}}
+@media (orientation:landscape) and (max-height:520px){
+  #app{max-width:860px;padding-top:max(8px,env(safe-area-inset-top));}
+  .quiz-body{display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px;align-items:center;}
+  .quiz-prompt{margin-top:4px;gap:4px;}
+  .audio-btn{width:60px;height:60px;font-size:28px;}
+  .big-emoji.pq{font-size:54px;}
+  .qtext{font-size:16px;text-align:center;}
+  .opts{margin-top:6px;gap:10px;}
+  .opt{aspect-ratio:auto;min-height:100px;font-size:68px;}
+  .round-result{margin-top:12px;gap:8px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <p id="storage-status" class="tip hidden" role="status"></p>
+
+  <!-- 首页 -->
+  <section id="scr-home" class="scr">
+    <div class="topbar">
+      <span class="chip" id="home-lvl"></span>
+      <span class="spacer"></span>
+      <span class="chip stars" id="home-stars"></span>
+      <button class="gear" id="btn-set" title="长按 3 秒进入家长设置">⚙️</button>
+    </div>
+    <div class="mascot">
+      <div class="face">🦖</div>
+      <div class="bubble" id="bubble"></div>
+    </div>
+    <div class="menu">
+      <button class="mbtn learn wide" id="btn-learn"><span class="mi">🃏</span><span>认 新 字</span><em class="badge" id="badge-learn"></em></button>
+      <button class="mbtn play" id="btn-play"><span class="mi">🎮</span><span>玩游戏</span></button>
+      <button class="mbtn rev" id="btn-review"><span class="mi">🔁</span><span>复 习</span><em class="badge" id="badge-review"></em></button>
+    </div>
+    <div class="menu" style="margin-top:14px;">
+      <button class="mbtn wall" id="btn-wall" style="grid-column:1/-1;"><span class="mi">🏆</span><span>成果墙</span></button>
+    </div>
+    <div id="voice-tip" class="tip hidden">
+      🔈 没有检测到中文语音：朗读功能需要系统安装中文语音包。<br>
+      请家长在手机系统中安装普通话语音。未准备好语音时可玩看字找字；音质和离线朗读取决于设备。
+    </div>
+  </section>
+
+  <!-- 学一学 -->
+  <section id="scr-learn" class="scr hidden">
+    <div class="topbar">
+      <button class="back" id="learn-home" aria-label="回到首页">🏠</button>
+      <button class="back" id="learn-pause" aria-label="暂停">⏸️</button>
+      <span class="spacer"></span>
+      <span class="learn-progress" id="learn-progress"></span>
+    </div>
+    <div id="learn-normal" class="learn-wrap">
+      <div class="learn-card">
+        <div class="big-emoji" id="learn-emoji"></div>
+        <div class="big-hanzi" id="learn-hanzi"></div>
+        <div class="pinyin" id="learn-pinyin"></div>
+        <div class="word" id="learn-word"></div>
+      </div>
+      <div class="stroke-box hidden" id="stroke-box"></div>
+      <div class="hint" id="stroke-status"></div>
+      <div class="hint">点大字可以再听一遍；笔顺是家长可选的兴趣体验</div>
+      <div class="btnrow">
+        <button class="rbtn" id="btn-replay">🔊 听一听</button>
+        <button class="rbtn primary" id="btn-next">下一个 ➡️</button>
+      </div>
+    </div>
+    <div id="learn-done" class="done-wrap hidden">
+      <div class="big">🎉</div>
+      <h2>这一组的字卡都体验过啦！</h2>
+      <div class="btnrow" style="max-width:360px;">
+        <button class="rbtn" id="done-home">🏠 回家</button>
+        <button class="rbtn primary" id="done-play">🎮 去巩固</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 玩游戏 -->
+  <section id="scr-quiz" class="scr hidden">
+    <div class="topbar">
+      <button class="back" id="quiz-home" aria-label="回到首页">🏠</button>
+      <button class="back" id="quiz-pause" aria-label="暂停">⏸️</button>
+      <div class="dots" id="quiz-dots"></div>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-prompt">
+        <button class="audio-btn" id="quiz-audio">🔊</button>
+        <div class="big-emoji pq hidden" id="quiz-emoji"></div>
+        <div class="qtext" id="quiz-question"></div>
+      </div>
+      <div class="opts" id="quiz-opts"></div>
+    </div>
+    <div class="round-result hidden" id="quiz-result">
+      <div class="big" style="font-size:80px;" id="result-face">🏆</div>
+      <h2 id="result-title"></h2>
+      <div class="stars" id="result-stars"></div>
+      <p class="rest-tip hidden" id="result-rest"></p>
+      <div class="btnrow" style="max-width:380px;">
+        <button class="rbtn" id="result-home">🏠 回家</button>
+        <button class="rbtn primary" id="result-again">🔁 再来一轮</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 成果墙 -->
+  <section id="scr-wall" class="scr hidden">
+    <div class="topbar">
+      <button class="back" id="wall-home">🏠</button>
+      <span class="chip" id="wall-title"></span>
+    </div>
+    <div class="progress-line" style="margin-top:10px;"><div id="wall-bar" style="width:0%"></div></div>
+    <div class="wall-count" id="wall-count"></div>
+    <div class="wall-done hidden" id="wall-done">🌿 这一组都体验过啦，去生活里找找吧！</div>
+    <div class="grid" id="wall-grid"></div>
+  </section>
+
+  <!-- 家长设置 -->
+  <section id="scr-set" class="scr hidden">
+    <div class="topbar">
+      <button class="back" id="set-home">🏠</button>
+      <span class="chip">家长设置</span>
+    </div>
+    <div class="set-block">
+      <h3>学习关卡（点击切换）</h3>
+      <p class="status-note">中班建议选择启蒙园。扩展字库是自定义分组，不是小学教材分年级字表，也不作为中班达标任务。</p>
+      <div class="lvl-list" id="lvl-list"></div>
+      <div class="set-review" id="set-review-info"></div>
+      <div class="raterow" style="margin-top:12px;"><label for="opt-batch">每次体验</label><select id="opt-batch"><option value="5">5 字</option><option value="10">10 字</option><option value="15">15 字</option><option value="20">20 字</option></select></div>
+    </div>
+    <div class="set-block">
+      <div class="switchrow"><span>卡片上显示拼音（家长参考，孩子不需要学）</span>
+        <label class="switch"><input type="checkbox" id="opt-pinyin"><span></span></label>
+      </div>
+    </div>
+    <div class="set-block">
+      <h3>使用情况（到轮数后自动休息）</h3>
+      <div class="switchrow"><span>今日已玩 <b id="set-rounds">0</b> / <b id="set-limit-n">5</b> 轮</span>
+        <button class="mini-btn" id="opt-reset-today">今日重置</button>
+      </div>
+      <div class="raterow" style="margin-top:12px;">
+        <span style="font-size:16px;font-weight:700;">每天最多玩</span>
+        <select id="opt-limit">
+          <option value="3">3</option><option value="5">5</option><option value="10">10</option>
+        </select>
+        <span style="font-size:16px;font-weight:700;">轮</span>
+      </div>
+    </div>
+    <div class="set-block">
+      <h3>朗读语速</h3>
+      <div class="raterow">
+        <input type="range" id="opt-rate" min="0.6" max="1.2" step="0.05">
+        <button id="opt-test">🔊 试听</button>
+      </div>
+    </div>
+    <div class="set-block" id="set-stroke-block">
+      <div class="switchrow"><span>可选笔顺体验（需联网，不要求跟写）</span><label class="switch"><input type="checkbox" id="opt-stroke"><span></span></label></div>
+      <p class="status-note">关闭时不向笔顺服务发送请求。开启后，第三方 CDN 可看到连接 IP 和请求的汉字；没有姓名、录音或学习记录上传。</p>
+    </div>
+    <div class="set-block">
+      <h3>安装、离线与更新</h3>
+      <p id="release-status" class="status-note">本地文件预览不等于手机安装包。</p>
+      <button class="mini-btn" id="check-update">检查更新</button>
+    </div>
+    <div class="set-block danger">
+      <h3>危险操作</h3>
+      <button id="opt-reset">🗑️ 清空全部学习记录</button>
+    </div>
+    <p class="foot" id="set-foot">学习记录保存在本机；清数据、卸载或换设备后记录不会跟随。</p>
+  </section>
+
+</div>
+<div id="confetti"></div>
+<div id="pause-cover" class="pause-cover hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div style="font-size:72px;">🌿</div>
+  <h2 id="pause-title">先休息一下</h2>
+  <p>没有计时催促，准备好了再继续。</p>
+  <button class="rbtn primary" id="resume-play">我准备好了</button>
+  <button class="rbtn" id="pause-home">回到首页</button>
+</div>
+
+<script>const LEVELS={"qimeng":"一二三四五六七八九十百千爸妈哥姐弟妹爷奶人男女王我你他友天地日月星云雨雪风电水火山石木花草树叶竹海河江光雷鸟鸡鸭鹅鱼虫猫狗牛羊马兔虎鹿猴鼠象龙蛇熊目耳口手足牙舌心头皮看听说读写画唱哭笑吃喝跑走跳爬坐睡立站来去开关回给拿打飞门窗车船机伞包书笔纸灯球杯碗刀勺椅床被衣帽鞋袜钟琴盒家屋路桥钱米面饭菜肉蛋果瓜茶糖红黄蓝绿黑白紫大小多少高快慢冷热好美上下左右中前后里外东年分早晚夜今明春夏秋冬","g1":"的是了不在有这们到时为子生国着就那和要她出也得自以会可而过能对然于学么之都起发当没成只如事把还用第样道想作种总从无情己最但现些所同又行意动方期它经长儿位爱老因很名法间斯知世什两次使身者已亲其进此话常与活正感见问力理尔点文几定本公特做孩相西将实向声全信重工物气每并别真太新比才便夫再部像眼等体却加主界利受表德克代员许先由死安性或住难望教命结乐色更拉神记处让母父应直字场平报放至张认接告入内英军候民岁往何度觉带万边解叫任金原变通师数失满战远格士音轻条呢病始达深完提求清化空业思切怎非找片罗吗语元喜曾离科言干流欢约各即指合反题必该论交终林请医制决传保运及则房院量苦布品近产答精视连司巴奇管类未朋且婚台青北队久乎越观落尽形影令周吧识步希亚术留市半送兴造谈容极随演收首根讲整式取照办强古华计您装似双妻尼转诉称丽客南领节刻统断福城故历惊脸选紧争另建维绝系伤示愿持史谁准联妇纪基买志静阿诗独复痛消社算义竟确酒需单治卡幸兰念举援共恐线啊哎哀唉埃挨癌矮艾碍氨俺岸按案暗昂凹熬傲奥澳叭拔坝罢霸柏摆败拜班般颁斑搬板版伴扮瓣邦帮膀傍棒胞宝饱堡抱豹暴爆卑悲碑贝备背倍辈奔崩逼鼻彼币毕闭辟碧蔽壁避臂编蝙鞭扁遍辨辩标宾滨冰兵丙柄饼","g2":"拨波玻剥播脖伯驳泊勃博搏膊薄卜补捕擦猜材财裁采彩踩蔡参餐残蚕惨灿仓苍舱藏操曹槽册侧测策层叉插查察差拆柴缠阐颤昌肠尝偿厂畅倡抄超巢朝潮吵炒扯彻撤尘臣沉陈闯衬趁撑呈承诚乘惩程橙池驰迟匙尺齿斥赤翅充冲崇抽仇绸愁筹酬丑瞅臭初除厨础储楚触川穿喘串晨创吹垂锤纯唇醇词瓷慈辞磁雌刺匆葱聪丛凑粗促催脆翠村存寸措错搭呆待袋逮戴丹担胆旦诞弹淡氮挡党荡导岛倒蹈盗稻登邓凳瞪低堤滴迪敌笛底抵帝递颠典店垫淀殿雕吊钓调掉爹跌叠蝶丁叮盯钉顶订丢懂冻洞斗抖陡豆督毒堵赌杜肚渡端短段锻堆吨敦蹲盾顿夺朵躲俄额恶饿鳄恩乏伐罚阀帆番翻凡烦繁返犯泛范贩坊芳防妨肪仿访纺啡菲肥废沸肺费纷芬坟粉份奋愤粪丰枫封疯峰锋蜂冯逢缝凤奉佛否肤孵弗伏扶服浮符幅辐蝠抚府辅腐付负附赴副傅富赋腹覆改钙盖溉概甘杆肝赶敢刚岗纲缸钢港搞稿戈胳鸽割歌阁革葛隔个跟耕弓功攻供宫恭巩拱贡勾沟钩构购够估咕姑孤菇谷股骨鼓固顾刮挂拐怪官冠馆贯惯灌罐广归龟规硅轨鬼柜贵桂滚棍郭锅裹哈害含函寒韩罕喊汉汗旱杭航毫豪号浩耗呵核荷贺褐赫鹤嘿痕狠恨哼恒横衡轰哄宏洪虹鸿侯喉吼厚呼忽狐胡壶湖葫糊蝴互户护哗滑划桦怀淮坏环缓幻唤换患荒慌皇煌晃灰恢挥辉徽毁悔汇绘惠慧昏浑魂混伙货获祸惑霍击饥圾肌积迹绩激吉级急疾集辑籍挤脊忌技际剂季既济继寂寄夹佳嘉甲贾钾价驾架假嫁稼尖坚肩艰兼监减剪检简碱件剑健舰渐践鉴键箭姜浆僵疆奖蒋匠降郊娇浇骄胶焦礁角脚搅轿较阶皆揭街劫杰洁捷截竭介戒届借巾斤津筋仅锦劲晋浸禁京茎晶睛鲸井颈景警净径竞敬境镜纠究旧救舅居局菊橘矩句巨拒具俱剧惧据距聚卷倦掘嚼君均菌俊峻凯慨刊堪砍康抗炕考烤","g3":"靠棵颗壳咳渴课肯坑孔控扣枯库裤酷夸跨块宽款狂况矿亏葵愧溃昆困扩括阔垃啦喇腊蜡辣莱赖拦栏篮览懒烂滥郎狼廊朗浪捞劳牢勒蕾泪累愣厘梨莉犁璃黎礼李哩鲤厉励例隶粒俩帘怜莲廉练炼恋链良凉梁粮亮辆辽疗聊僚料列劣烈猎裂邻临淋磷灵玲凌铃陵羚零龄岭溜刘硫瘤柳笼隆垄拢楼漏露卢芦炉鲁陆录碌驴旅铝履律虑率氯滤卵乱掠略伦轮萝逻螺裸洛络骆麻玛码蚂骂嘛埋迈麦卖脉蛮曼漫忙芒盲茫毛矛茅茂冒贸貌枚玫眉梅媒煤霉闷萌盟猛蒙孟梦弥迷谜泌秘密蜜眠绵棉免勉苗描秒妙庙灭敏鸣摸模膜摩磨蘑魔抹末沫陌莫漠墨默谋某亩牡姆拇牧墓幕慕穆哪纳娜钠乃奈耐囊恼脑闹嫩泥拟逆娘酿尿捏宁凝扭纽农浓弄奴努怒暖挪诺哦欧偶帕怕拍排牌派攀盘判叛盼庞旁胖抛炮泡胚陪培赔佩配喷盆棚蓬鹏膨捧碰批披疲脾匹屁譬偏篇骗漂飘瓢票拼贫频评凭苹屏瓶萍坡泼颇婆迫破剖扑铺葡蒲朴浦普谱栖戚欺漆齐歧骑棋旗企岂启弃汽契砌器恰迁牵铅谦签潜浅遣欠枪腔墙抢悄敲乔瞧巧茄窃侵秦禽勤氢倾晴顷庆穷丘蚯区曲驱屈躯趋娶趣圈权泉拳犬劝券缺雀鹊裙群燃染嚷壤饶扰绕惹仁忍扔仍绒荣溶熔融柔儒乳辱软锐瑞润若弱撒洒萨塞赛散桑嗓丧扫嫂森僧杀沙纱刹砂傻啥晒杉衫珊闪陕扇善商赏尚梢烧稍绍哨舍设射涉摄申伸审婶肾甚渗慎升牲胜绳省圣盛剩尸施狮湿拾蚀食驶氏侍势试饰室适逝释守寿兽售授瘦抒叔枢殊疏舒输蔬熟暑署薯束述竖刷耍衰摔甩帅霜爽税顺瞬丝私撕寺饲松耸宋颂搜艘苏俗肃素速宿塑酸蒜虽髓遂碎穗孙损笋缩索锁塌塔踏胎抬态泰贪摊滩坛潭坦叹炭探碳汤唐堂塘躺趟涛掏逃桃陶淘萄讨套疼腾藤梯踢啼蹄替添田甜填挑贴铁厅廷亭庭停蜓挺艇桐铜童桶筒偷投透突图徒涂途屠土吐团推腿退吞托拖脱驼妥拓唾哇娃挖蛙瓦歪弯湾丸玩顽挽汪亡网忘旺危威微围违唯惟伟伪尾纬委萎卫味胃谓喂慰魏温纹闻蚊吻稳翁窝沃卧握乌污吴吾午伍武舞务误悟雾夕吸析息牺悉惜晰稀溪锡熙嘻膝习席袭媳洗戏细隙虾瞎峡狭辖霞吓厦仙纤掀鲜闲弦贤咸衔嫌显险县限宪陷献腺乡香厢湘箱详祥翔享响巷项橡削萧硝销晓孝效校歇协胁斜谐携泄泻卸屑械谢蟹辛欣猩刑型醒杏姓凶兄匈胸雄休修羞朽秀绣袖须虚徐序叙畜绪续嗅蓄宣玄悬旋穴血寻巡询循训讯迅压呀鸦芽","g4":"崖哑雅咽烟淹延严岩沿炎研盐颜衍掩厌宴艳验焰雁燕央扬阳杨洋仰养氧痒腰邀摇遥咬药耀冶野页液伊依仪夷宜姨移遗疑乙矣蚁亿忆艺议亦异役抑译易疫益谊逸溢毅翼阴吟银引饮蚓隐印婴鹰迎盈营蝇赢映硬哟拥永泳勇涌优忧幽悠尤犹邮油游幼诱予余娱渔愉愚宇羽玉吁育郁狱浴预域欲喻寓御裕遇愈誉豫园圆袁缘源怨曰岳钥悦阅跃匀允孕晕韵蕴杂砸灾栽宰载咱暂赞脏葬遭糟枣藻灶皂噪燥躁择泽责贼增赠渣扎眨炸摘宅窄债沾粘展占章涨掌丈仗帐胀账障招召兆赵罩遮折哲浙针侦珍诊枕阵振镇震征挣睁蒸证郑政症支汁芝枝织肢脂蜘执值职植殖止旨址趾质致智置忠肿仲众州舟洲轴宙皱骤朱株珠诸猪蛛烛逐属煮嘱助注贮驻柱祝著筑抓爪专砖赚庄桩壮状撞追捉桌仔兹姿资滋籽宗综棕踪纵奏租族阻组祖钻嘴罪醉尊遵昨座"};
+const PINYIN={"一":"yī","二":"èr","三":"sān","四":"sì","五":"wǔ","六":"liù","七":"qī","八":"bā","九":"jiǔ","十":"shí","百":"bǎi","千":"qiān","爸":"bà","妈":"mā","哥":"gē","姐":"jiě","弟":"dì","妹":"mèi","爷":"yé","奶":"nǎi","人":"rén","男":"nán","女":"nǚ","王":"wáng","我":"wǒ","你":"nǐ","他":"tā","友":"yǒu","天":"tiān","地":"dì","日":"rì","月":"yuè","星":"xīng","云":"yún","雨":"yǔ","雪":"xuě","风":"fēng","电":"diàn","水":"shuǐ","火":"huǒ","山":"shān","石":"shí","木":"mù","花":"huā","草":"cǎo","树":"shù","叶":"yè","竹":"zhú","海":"hǎi","河":"hé","江":"jiāng","光":"guāng","雷":"léi","鸟":"niǎo","鸡":"jī","鸭":"yā","鹅":"é","鱼":"yú","虫":"chóng","猫":"māo","狗":"gǒu","牛":"niú","羊":"yáng","马":"mǎ","兔":"tù","虎":"hǔ","鹿":"lù","猴":"hóu","鼠":"shǔ","象":"xiàng","龙":"lóng","蛇":"shé","熊":"xióng","目":"mù","耳":"ěr","口":"kǒu","手":"shǒu","足":"zú","牙":"yá","舌":"shé","心":"xīn","头":"tóu","皮":"pí","看":"kàn","听":"tīng","说":"shuō","读":"dú","写":"xiě","画":"huà","唱":"chàng","哭":"kū","笑":"xiào","吃":"chī","喝":"hē","跑":"pǎo","走":"zǒu","跳":"tiào","爬":"pá","坐":"zuò","睡":"shuì","立":"lì","站":"zhàn","来":"lái","去":"qù","开":"kāi","关":"guān","回":"huí","给":"gěi","拿":"ná","打":"dǎ","飞":"fēi","门":"mén","窗":"chuāng","车":"chē","船":"chuán","机":"jī","伞":"sǎn","包":"bāo","书":"shū","笔":"bǐ","纸":"zhǐ","灯":"dēng","球":"qiú","杯":"bēi","碗":"wǎn","刀":"dāo","勺":"sháo","椅":"yǐ","床":"chuáng","被":"bèi","衣":"yī","帽":"mào","鞋":"xié","袜":"wà","钟":"zhōng","琴":"qín","盒":"hé","家":"jiā","屋":"wū","路":"lù","桥":"qiáo","钱":"qián","米":"mǐ","面":"miàn","饭":"fàn","菜":"cài","肉":"ròu","蛋":"dàn","果":"guǒ","瓜":"guā","茶":"chá","糖":"táng","红":"hóng","黄":"huáng","蓝":"lán","绿":"lǜ","黑":"hēi","白":"bái","紫":"zǐ","大":"dà","小":"xiǎo","多":"duō","少":"shǎo","高":"gāo","快":"kuài","慢":"màn","冷":"lěng","热":"rè","好":"hǎo","美":"měi","上":"shàng","下":"xià","左":"zuǒ","右":"yòu","中":"zhōng","前":"qián","后":"hòu","里":"lǐ","外":"wài","东":"dōng","年":"nián","分":"fēn","早":"zǎo","晚":"wǎn","夜":"yè","今":"jīn","明":"míng","春":"chūn","夏":"xià","秋":"qiū","冬":"dōng","的":"de","是":"shì","了":"liǎo","不":"bù","在":"zài","有":"yǒu","这":"zhè","们":"men","到":"dào","时":"shí","为":"wèi","子":"zǐ","生":"shēng","国":"guó","着":"zhe","就":"jiù","那":"nà","和":"hé","要":"yào","她":"tā","出":"chū","也":"yě","得":"dé","自":"zì","以":"yǐ","会":"huì","可":"kě","而":"ér","过":"guò","能":"néng","对":"duì","然":"rán","于":"yú","学":"xué","么":"me","之":"zhī","都":"dōu","起":"qǐ","发":"fā","当":"dāng","没":"méi","成":"chéng","只":"zhī","如":"rú","事":"shì","把":"bǎ","还":"hái","用":"yòng","第":"dì","样":"yàng","道":"dào","想":"xiǎng","作":"zuò","种":"zhǒng","总":"zǒng","从":"cóng","无":"wú","情":"qíng","己":"jǐ","最":"zuì","但":"dàn","现":"xiàn","些":"xiē","所":"suǒ","同":"tóng","又":"yòu","行":"xíng","意":"yì","动":"dòng","方":"fāng","期":"qī","它":"tā","经":"jīng","长":"cháng","儿":"ér","位":"wèi","爱":"ài","老":"lǎo","因":"yīn","很":"hěn","名":"míng","法":"fǎ","间":"jiān","斯":"sī","知":"zhī","世":"shì","什":"shén","两":"liǎng","次":"cì","使":"shǐ","身":"shēn","者":"zhě","已":"yǐ","亲":"qīn","其":"qí","进":"jìn","此":"cǐ","话":"huà","常":"cháng","与":"yǔ","活":"huó","正":"zhèng","感":"gǎn","见":"jiàn","问":"wèn","力":"lì","理":"lǐ","尔":"ěr","点":"diǎn","文":"wén","几":"jǐ","定":"dìng","本":"běn","公":"gōng","特":"tè","做":"zuò","孩":"hái","相":"xiāng","西":"xī","将":"jiāng","实":"shí","向":"xiàng","声":"shēng","全":"quán","信":"xìn","重":"zhòng","工":"gōng","物":"wù","气":"qì","每":"měi","并":"bìng","别":"bié","真":"zhēn","太":"tài","新":"xīn","比":"bǐ","才":"cái","便":"biàn","夫":"fū","再":"zài","部":"bù","像":"xiàng","眼":"yǎn","等":"děng","体":"tǐ","却":"què","加":"jiā","主":"zhǔ","界":"jiè","利":"lì","受":"shòu","表":"biǎo","德":"dé","克":"kè","代":"dài","员":"yuán","许":"xǔ","先":"xiān","由":"yóu","死":"sǐ","安":"ān","性":"xìng","或":"huò","住":"zhù","难":"nán","望":"wàng","教":"jiào","命":"mìng","结":"jié","乐":"lè","色":"sè","更":"gèng","拉":"lā","神":"shén","记":"jì","处":"chù","让":"ràng","母":"mǔ","父":"fù","应":"yìng","直":"zhí","字":"zì","场":"chǎng","平":"píng","报":"bào","放":"fàng","至":"zhì","张":"zhāng","认":"rèn","接":"jiē","告":"gào","入":"rù","内":"nèi","英":"yīng","军":"jūn","候":"hòu","民":"mín","岁":"suì","往":"wǎng","何":"hé","度":"dù","觉":"jué","带":"dài","万":"wàn","边":"biān","解":"jiě","叫":"jiào","任":"rèn","金":"jīn","原":"yuán","变":"biàn","通":"tōng","师":"shī","数":"shù","失":"shī","满":"mǎn","战":"zhàn","远":"yuǎn","格":"gé","士":"shì","音":"yīn","轻":"qīng","条":"tiáo","呢":"ne","病":"bìng","始":"shǐ","达":"dá","深":"shēn","完":"wán","提":"tí","求":"qiú","清":"qīng","化":"huà","空":"kōng","业":"yè","思":"sī","切":"qiè","怎":"zěn","非":"fēi","找":"zhǎo","片":"piàn","罗":"luó","吗":"ma","语":"yǔ","元":"yuán","喜":"xǐ","曾":"céng","离":"lí","科":"kē","言":"yán","干":"gān","流":"liú","欢":"huān","约":"yuē","各":"gè","即":"jí","指":"zhǐ","合":"hé","反":"fǎn","题":"tí","必":"bì","该":"gāi","论":"lùn","交":"jiāo","终":"zhōng","林":"lín","请":"qǐng","医":"yī","制":"zhì","决":"jué","传":"chuán","保":"bǎo","运":"yùn","及":"jí","则":"zé","房":"fáng","院":"yuàn","量":"liáng","苦":"kǔ","布":"bù","品":"pǐn","近":"jìn","产":"chǎn","答":"dá","精":"jīng","视":"shì","连":"lián","司":"sī","巴":"bā","奇":"qí","管":"guǎn","类":"lèi","未":"wèi","朋":"péng","且":"qiě","婚":"hūn","台":"tái","青":"qīng","北":"běi","队":"duì","久":"jiǔ","乎":"hū","越":"yuè","观":"guān","落":"luò","尽":"jìn","形":"xíng","影":"yǐng","令":"lìng","周":"zhōu","吧":"ba","识":"shí","步":"bù","希":"xī","亚":"yà","术":"shù","留":"liú","市":"shì","半":"bàn","送":"sòng","兴":"xīng","造":"zào","谈":"tán","容":"róng","极":"jí","随":"suí","演":"yǎn","收":"shōu","首":"shǒu","根":"gēn","讲":"jiǎng","整":"zhěng","式":"shì","取":"qǔ","照":"zhào","办":"bàn","强":"qiáng","古":"gǔ","华":"huá","计":"jì","您":"nín","装":"zhuāng","似":"sì","双":"shuāng","妻":"qī","尼":"ní","转":"zhuǎn","诉":"sù","称":"chēng","丽":"lì","客":"kè","南":"nán","领":"lǐng","节":"jié","刻":"kè","统":"tǒng","断":"duàn","福":"fú","城":"chéng","故":"gù","历":"lì","惊":"jīng","脸":"liǎn","选":"xuǎn","紧":"jǐn","争":"zhēng","另":"lìng","建":"jiàn","维":"wéi","绝":"jué","系":"xì","伤":"shāng","示":"shì","愿":"yuàn","持":"chí","史":"shǐ","谁":"shuí","准":"zhǔn","联":"lián","妇":"fù","纪":"jì","基":"jī","买":"mǎi","志":"zhì","静":"jìng","阿":"ā","诗":"shī","独":"dú","复":"fù","痛":"tòng","消":"xiāo","社":"shè","算":"suàn","义":"yì","竟":"jìng","确":"què","酒":"jiǔ","需":"xū","单":"dān","治":"zhì","卡":"kǎ","幸":"xìng","兰":"lán","念":"niàn","举":"jǔ","援":"yuán","共":"gòng","恐":"kǒng","线":"xiàn","啊":"a","哎":"āi","哀":"āi","唉":"ài","埃":"āi","挨":"āi","癌":"ái","矮":"ǎi","艾":"ài","碍":"ài","氨":"ān","俺":"ǎn","岸":"àn","按":"àn","案":"àn","暗":"àn","昂":"áng","凹":"āo","熬":"áo","傲":"ào","奥":"ào","澳":"ào","叭":"bā","拔":"bá","坝":"bà","罢":"bà","霸":"bà","柏":"bǎi","摆":"bǎi","败":"bài","拜":"bài","班":"bān","般":"bān","颁":"bān","斑":"bān","搬":"bān","板":"bǎn","版":"bǎn","伴":"bàn","扮":"bàn","瓣":"bàn","邦":"bāng","帮":"bāng","膀":"bǎng","傍":"bàng","棒":"bàng","胞":"bāo","宝":"bǎo","饱":"bǎo","堡":"bǎo","抱":"bào","豹":"bào","暴":"bào","爆":"bào","卑":"bēi","悲":"bēi","碑":"bēi","贝":"bèi","备":"bèi","背":"bèi","倍":"bèi","辈":"bèi","奔":"bēn","崩":"bēng","逼":"bī","鼻":"bí","彼":"bǐ","币":"bì","毕":"bì","闭":"bì","辟":"pì","碧":"bì","蔽":"bì","壁":"bì","避":"bì","臂":"bì","编":"biān","蝙":"biān","鞭":"biān","扁":"biǎn","遍":"biàn","辨":"biàn","辩":"biàn","标":"biāo","宾":"bīn","滨":"bīn","冰":"bīng","兵":"bīng","丙":"bǐng","柄":"bǐng","饼":"bǐng","拨":"bō","波":"bō","玻":"bō","剥":"bāo","播":"bō","脖":"bó","伯":"bó","驳":"bó","泊":"bó","勃":"bó","博":"bó","搏":"bó","膊":"bó","薄":"báo","卜":"bǔ","补":"bǔ","捕":"bǔ","擦":"cā","猜":"cāi","材":"cái","财":"cái","裁":"cái","采":"cǎi","彩":"cǎi","踩":"cǎi","蔡":"cài","参":"cān","餐":"cān","残":"cán","蚕":"cán","惨":"cǎn","灿":"càn","仓":"cāng","苍":"cāng","舱":"cāng","藏":"cáng","操":"cāo","曹":"cáo","槽":"cáo","册":"cè","侧":"cè","测":"cè","策":"cè","层":"céng","叉":"chā","插":"chā","查":"chá","察":"chá","差":"chà","拆":"chāi","柴":"chái","缠":"chán","阐":"chǎn","颤":"chàn","昌":"chāng","肠":"cháng","尝":"cháng","偿":"cháng","厂":"chǎng","畅":"chàng","倡":"chàng","抄":"chāo","超":"chāo","巢":"cháo","朝":"cháo","潮":"cháo","吵":"chǎo","炒":"chǎo","扯":"chě","彻":"chè","撤":"chè","尘":"chén","臣":"chén","沉":"chén","陈":"chén","闯":"chuǎng","衬":"chèn","趁":"chèn","撑":"chēng","呈":"chéng","承":"chéng","诚":"chéng","乘":"chéng","惩":"chéng","程":"chéng","橙":"chéng","池":"chí","驰":"chí","迟":"chí","匙":"chí","尺":"chǐ","齿":"chǐ","斥":"chì","赤":"chì","翅":"chì","充":"chōng","冲":"chōng","崇":"chóng","抽":"chōu","仇":"chóu","绸":"chóu","愁":"chóu","筹":"chóu","酬":"chóu","丑":"chǒu","瞅":"chǒu","臭":"chòu","初":"chū","除":"chú","厨":"chú","础":"chǔ","储":"chǔ","楚":"chǔ","触":"chù","川":"chuān","穿":"chuān","喘":"chuǎn","串":"chuàn","晨":"chén","创":"chuàng","吹":"chuī","垂":"chuí","锤":"chuí","纯":"chún","唇":"chún","醇":"chún","词":"cí","瓷":"cí","慈":"cí","辞":"cí","磁":"cí","雌":"cí","刺":"cì","匆":"cōng","葱":"cōng","聪":"cōng","丛":"cóng","凑":"còu","粗":"cū","促":"cù","催":"cuī","脆":"cuì","翠":"cuì","村":"cūn","存":"cún","寸":"cùn","措":"cuò","错":"cuò","搭":"dā","呆":"dāi","待":"dài","袋":"dài","逮":"dǎi","戴":"dài","丹":"dān","担":"dān","胆":"dǎn","旦":"dàn","诞":"dàn","弹":"tán","淡":"dàn","氮":"dàn","挡":"dǎng","党":"dǎng","荡":"dàng","导":"dǎo","岛":"dǎo","倒":"dǎo","蹈":"dǎo","盗":"dào","稻":"dào","登":"dēng","邓":"dèng","凳":"dèng","瞪":"dèng","低":"dī","堤":"dī","滴":"dī","迪":"dí","敌":"dí","笛":"dí","底":"dǐ","抵":"dǐ","帝":"dì","递":"dì","颠":"diān","典":"diǎn","店":"diàn","垫":"diàn","淀":"diàn","殿":"diàn","雕":"diāo","吊":"diào","钓":"diào","调":"tiáo","掉":"diào","爹":"diē","跌":"diē","叠":"dié","蝶":"dié","丁":"dīng","叮":"dīng","盯":"dīng","钉":"dīng","顶":"dǐng","订":"dìng","丢":"diū","懂":"dǒng","冻":"dòng","洞":"dòng","斗":"dòu","抖":"dǒu","陡":"dǒu","豆":"dòu","督":"dū","毒":"dú","堵":"dǔ","赌":"dǔ","杜":"dù","肚":"dù","渡":"dù","端":"duān","短":"duǎn","段":"duàn","锻":"duàn","堆":"duī","吨":"dūn","敦":"dūn","蹲":"dūn","盾":"dùn","顿":"dùn","夺":"duó","朵":"duǒ","躲":"duǒ","俄":"é","额":"é","恶":"è","饿":"è","鳄":"è","恩":"ēn","乏":"fá","伐":"fá","罚":"fá","阀":"fá","帆":"fān","番":"fān","翻":"fān","凡":"fán","烦":"fán","繁":"fán","返":"fǎn","犯":"fàn","泛":"fàn","范":"fàn","贩":"fàn","坊":"fāng","芳":"fāng","防":"fáng","妨":"fáng","肪":"fáng","仿":"fǎng","访":"fǎng","纺":"fǎng","啡":"fēi","菲":"fēi","肥":"féi","废":"fèi","沸":"fèi","肺":"fèi","费":"fèi","纷":"fēn","芬":"fēn","坟":"fén","粉":"fěn","份":"fèn","奋":"fèn","愤":"fèn","粪":"fèn","丰":"fēng","枫":"fēng","封":"fēng","疯":"fēng","峰":"fēng","锋":"fēng","蜂":"fēng","冯":"féng","逢":"féng","缝":"fèng","凤":"fèng","奉":"fèng","佛":"fó","否":"fǒu","肤":"fū","孵":"fū","弗":"fú","伏":"fú","扶":"fú","服":"fú","浮":"fú","符":"fú","幅":"fú","辐":"fú","蝠":"fú","抚":"fǔ","府":"fǔ","辅":"fǔ","腐":"fǔ","付":"fù","负":"fù","附":"fù","赴":"fù","副":"fù","傅":"fù","富":"fù","赋":"fù","腹":"fù","覆":"fù","改":"gǎi","钙":"gài","盖":"gài","溉":"gài","概":"gài","甘":"gān","杆":"gān","肝":"gān","赶":"gǎn","敢":"gǎn","刚":"gāng","岗":"gǎng","纲":"gāng","缸":"gāng","钢":"gāng","港":"gǎng","搞":"gǎo","稿":"gǎo","戈":"gē","胳":"gē","鸽":"gē","割":"gē","歌":"gē","阁":"gé","革":"gé","葛":"gě","隔":"gé","个":"gè","跟":"gēn","耕":"gēng","弓":"gōng","功":"gōng","攻":"gōng","供":"gòng","宫":"gōng","恭":"gōng","巩":"gǒng","拱":"gǒng","贡":"gòng","勾":"gōu","沟":"gōu","钩":"gōu","构":"gòu","购":"gòu","够":"gòu","估":"gū","咕":"gū","姑":"gū","孤":"gū","菇":"gū","谷":"gǔ","股":"gǔ","骨":"gǔ","鼓":"gǔ","固":"gù","顾":"gù","刮":"guā","挂":"guà","拐":"guǎi","怪":"guài","官":"guān","冠":"guān","馆":"guǎn","贯":"guàn","惯":"guàn","灌":"guàn","罐":"guàn","广":"guǎng","归":"guī","龟":"guī","规":"guī","硅":"guī","轨":"guǐ","鬼":"guǐ","柜":"guì","贵":"guì","桂":"guì","滚":"gǔn","棍":"gùn","郭":"guō","锅":"guō","裹":"guǒ","哈":"hā","害":"hài","含":"hán","函":"hán","寒":"hán","韩":"hán","罕":"hǎn","喊":"hǎn","汉":"hàn","汗":"hàn","旱":"hàn","杭":"háng","航":"háng","毫":"háo","豪":"háo","号":"hào","浩":"hào","耗":"hào","呵":"hē","核":"hé","荷":"hé","贺":"hè","褐":"hè","赫":"hè","鹤":"hè","嘿":"hēi","痕":"hén","狠":"hěn","恨":"hèn","哼":"hēng","恒":"héng","横":"héng","衡":"héng","轰":"hōng","哄":"hǒng","宏":"hóng","洪":"hóng","虹":"hóng","鸿":"hóng","侯":"hóu","喉":"hóu","吼":"hǒu","厚":"hòu","呼":"hū","忽":"hū","狐":"hú","胡":"hú","壶":"hú","湖":"hú","葫":"hú","糊":"hú","蝴":"hú","互":"hù","户":"hù","护":"hù","哗":"huá","滑":"huá","划":"huà","桦":"huà","怀":"huái","淮":"huái","坏":"huài","环":"huán","缓":"huǎn","幻":"huàn","唤":"huàn","换":"huàn","患":"huàn","荒":"huāng","慌":"huāng","皇":"huáng","煌":"huáng","晃":"huàng","灰":"huī","恢":"huī","挥":"huī","辉":"huī","徽":"huī","毁":"huǐ","悔":"huǐ","汇":"huì","绘":"huì","惠":"huì","慧":"huì","昏":"hūn","浑":"hún","魂":"hún","混":"hùn","伙":"huǒ","货":"huò","获":"huò","祸":"huò","惑":"huò","霍":"huò","击":"jī","饥":"jī","圾":"jī","肌":"jī","积":"jī","迹":"jì","绩":"jì","激":"jī","吉":"jí","级":"jí","急":"jí","疾":"jí","集":"jí","辑":"jí","籍":"jí","挤":"jǐ","脊":"jǐ","忌":"jì","技":"jì","际":"jì","剂":"jì","季":"jì","既":"jì","济":"jì","继":"jì","寂":"jì","寄":"jì","夹":"jiá","佳":"jiā","嘉":"jiā","甲":"jiǎ","贾":"jiǎ","钾":"jiǎ","价":"jià","驾":"jià","架":"jià","假":"jiǎ","嫁":"jià","稼":"jià","尖":"jiān","坚":"jiān","肩":"jiān","艰":"jiān","兼":"jiān","监":"jiān","减":"jiǎn","剪":"jiǎn","检":"jiǎn","简":"jiǎn","碱":"jiǎn","件":"jiàn","剑":"jiàn","健":"jiàn","舰":"jiàn","渐":"jiàn","践":"jiàn","鉴":"jiàn","键":"jiàn","箭":"jiàn","姜":"jiāng","浆":"jiāng","僵":"jiāng","疆":"jiāng","奖":"jiǎng","蒋":"jiǎng","匠":"jiàng","降":"jiàng","郊":"jiāo","娇":"jiāo","浇":"jiāo","骄":"jiāo","胶":"jiāo","焦":"jiāo","礁":"jiāo","角":"jiǎo","脚":"jiǎo","搅":"jiǎo","轿":"jiào","较":"jiào","阶":"jiē","皆":"jiē","揭":"jiē","街":"jiē","劫":"jié","杰":"jié","洁":"jié","捷":"jié","截":"jié","竭":"jié","介":"jiè","戒":"jiè","届":"jiè","借":"jiè","巾":"jīn","斤":"jīn","津":"jīn","筋":"jīn","仅":"jǐn","锦":"jǐn","劲":"jìn","晋":"jìn","浸":"jìn","禁":"jìn","京":"jīng","茎":"jīng","晶":"jīng","睛":"jīng","鲸":"jīng","井":"jǐng","颈":"jǐng","景":"jǐng","警":"jǐng","净":"jìng","径":"jìng","竞":"jìng","敬":"jìng","境":"jìng","镜":"jìng","纠":"jiū","究":"jiū","旧":"jiù","救":"jiù","舅":"jiù","居":"jū","局":"jú","菊":"jú","橘":"jú","矩":"jǔ","句":"jù","巨":"jù","拒":"jù","具":"jù","俱":"jù","剧":"jù","惧":"jù","据":"jù","距":"jù","聚":"jù","卷":"juàn","倦":"juàn","掘":"jué","嚼":"jiáo","君":"jūn","均":"jūn","菌":"jūn","俊":"jùn","峻":"jùn","凯":"kǎi","慨":"kǎi","刊":"kān","堪":"kān","砍":"kǎn","康":"kāng","抗":"kàng","炕":"kàng","考":"kǎo","烤":"kǎo","靠":"kào","棵":"kē","颗":"kē","壳":"ké","咳":"hāi","渴":"kě","课":"kè","肯":"kěn","坑":"kēng","孔":"kǒng","控":"kòng","扣":"kòu","枯":"kū","库":"kù","裤":"kù","酷":"kù","夸":"kuā","跨":"kuà","块":"kuài","宽":"kuān","款":"kuǎn","狂":"kuáng","况":"kuàng","矿":"kuàng","亏":"kuī","葵":"kuí","愧":"kuì","溃":"kuì","昆":"kūn","困":"kùn","扩":"kuò","括":"kuò","阔":"kuò","垃":"lā","啦":"lā","喇":"lā","腊":"là","蜡":"là","辣":"là","莱":"lái","赖":"lài","拦":"lán","栏":"lán","篮":"lán","览":"lǎn","懒":"lǎn","烂":"làn","滥":"làn","郎":"láng","狼":"láng","廊":"láng","朗":"lǎng","浪":"làng","捞":"lāo","劳":"láo","牢":"láo","勒":"lè","蕾":"lěi","泪":"lèi","累":"lèi","愣":"lèng","厘":"lí","梨":"lí","莉":"lì","犁":"lí","璃":"lí","黎":"lí","礼":"lǐ","李":"lǐ","哩":"lī","鲤":"lǐ","厉":"lì","励":"lì","例":"lì","隶":"lì","粒":"lì","俩":"liǎ","帘":"lián","怜":"lián","莲":"lián","廉":"lián","练":"liàn","炼":"liàn","恋":"liàn","链":"liàn","良":"liáng","凉":"liáng","梁":"liáng","粮":"liáng","亮":"liàng","辆":"liàng","辽":"liáo","疗":"liáo","聊":"liáo","僚":"liáo","料":"liào","列":"liè","劣":"liè","烈":"liè","猎":"liè","裂":"liè","邻":"lín","临":"lín","淋":"lín","磷":"lín","灵":"líng","玲":"líng","凌":"líng","铃":"líng","陵":"líng","羚":"líng","零":"líng","龄":"líng","岭":"lǐng","溜":"liū","刘":"liú","硫":"liú","瘤":"liú","柳":"liǔ","笼":"lóng","隆":"lóng","垄":"lǒng","拢":"lǒng","楼":"lóu","漏":"lòu","露":"lù","卢":"lú","芦":"lú","炉":"lú","鲁":"lǔ","陆":"lù","录":"lù","碌":"lù","驴":"lǘ","旅":"lǚ","铝":"lǚ","履":"lǚ","律":"lǜ","虑":"lǜ","率":"lǜ","氯":"lǜ","滤":"lǜ","卵":"luǎn","乱":"luàn","掠":"lüè","略":"lüè","伦":"lún","轮":"lún","萝":"luó","逻":"luó","螺":"luó","裸":"luǒ","洛":"luò","络":"luò","骆":"luò","麻":"má","玛":"mǎ","码":"mǎ","蚂":"mǎ","骂":"mà","嘛":"ma","埋":"mái","迈":"mài","麦":"mài","卖":"mài","脉":"mài","蛮":"mán","曼":"màn","漫":"màn","忙":"máng","芒":"máng","盲":"máng","茫":"máng","毛":"máo","矛":"máo","茅":"máo","茂":"mào","冒":"mào","贸":"mào","貌":"mào","枚":"méi","玫":"méi","眉":"méi","梅":"méi","媒":"méi","煤":"méi","霉":"méi","闷":"mēn","萌":"méng","盟":"méng","猛":"měng","蒙":"méng","孟":"mèng","梦":"mèng","弥":"mí","迷":"mí","谜":"mí","泌":"mì","秘":"mì","密":"mì","蜜":"mì","眠":"mián","绵":"mián","棉":"mián","免":"miǎn","勉":"miǎn","苗":"miáo","描":"miáo","秒":"miǎo","妙":"miào","庙":"miào","灭":"miè","敏":"mǐn","鸣":"míng","摸":"mō","模":"mó","膜":"mó","摩":"mó","磨":"mó","蘑":"mó","魔":"mó","抹":"mǒ","末":"mò","沫":"mò","陌":"mò","莫":"mò","漠":"mò","墨":"mò","默":"mò","谋":"móu","某":"mǒu","亩":"mǔ","牡":"mǔ","姆":"mǔ","拇":"mǔ","牧":"mù","墓":"mù","幕":"mù","慕":"mù","穆":"mù","哪":"nǎ","纳":"nà","娜":"nà","钠":"nà","乃":"nǎi","奈":"nài","耐":"nài","囊":"náng","恼":"nǎo","脑":"nǎo","闹":"nào","嫩":"nèn","泥":"ní","拟":"nǐ","逆":"nì","娘":"niáng","酿":"niàng","尿":"niào","捏":"niē","宁":"níng","凝":"níng","扭":"niǔ","纽":"niǔ","农":"nóng","浓":"nóng","弄":"nòng","奴":"nú","努":"nǔ","怒":"nù","暖":"nuǎn","挪":"nuó","诺":"nuò","哦":"ò","欧":"ōu","偶":"ǒu","帕":"pà","怕":"pà","拍":"pāi","排":"pái","牌":"pái","派":"pài","攀":"pān","盘":"pán","判":"pàn","叛":"pàn","盼":"pàn","庞":"páng","旁":"páng","胖":"pàng","抛":"pāo","炮":"pào","泡":"pào","胚":"pēi","陪":"péi","培":"péi","赔":"péi","佩":"pèi","配":"pèi","喷":"pēn","盆":"pén","棚":"péng","蓬":"péng","鹏":"péng","膨":"péng","捧":"pěng","碰":"pèng","批":"pī","披":"pī","疲":"pí","脾":"pí","匹":"pǐ","屁":"pì","譬":"pì","偏":"piān","篇":"piān","骗":"piàn","漂":"piāo","飘":"piāo","瓢":"piáo","票":"piào","拼":"pīn","贫":"pín","频":"pín","评":"píng","凭":"píng","苹":"píng","屏":"píng","瓶":"píng","萍":"píng","坡":"pō","泼":"pō","颇":"pō","婆":"pó","迫":"pò","破":"pò","剖":"pōu","扑":"pū","铺":"pù","葡":"pú","蒲":"pú","朴":"pǔ","浦":"pǔ","普":"pǔ","谱":"pǔ","栖":"qī","戚":"qī","欺":"qī","漆":"qī","齐":"qí","歧":"qí","骑":"qí","棋":"qí","旗":"qí","企":"qǐ","岂":"qǐ","启":"qǐ","弃":"qì","汽":"qì","契":"qì","砌":"qì","器":"qì","恰":"qià","迁":"qiān","牵":"qiān","铅":"qiān","谦":"qiān","签":"qiān","潜":"qián","浅":"qiǎn","遣":"qiǎn","欠":"qiàn","枪":"qiāng","腔":"qiāng","墙":"qiáng","抢":"qiǎng","悄":"qiāo","敲":"qiāo","乔":"qiáo","瞧":"qiáo","巧":"qiǎo","茄":"qié","窃":"qiè","侵":"qīn","秦":"qín","禽":"qín","勤":"qín","氢":"qīng","倾":"qīng","晴":"qíng","顷":"qǐng","庆":"qìng","穷":"qióng","丘":"qiū","蚯":"qiū","区":"qū","曲":"qǔ","驱":"qū","屈":"qū","躯":"qū","趋":"qū","娶":"qǔ","趣":"qù","圈":"quān","权":"quán","泉":"quán","拳":"quán","犬":"quǎn","劝":"quàn","券":"quàn","缺":"quē","雀":"què","鹊":"què","裙":"qún","群":"qún","燃":"rán","染":"rǎn","嚷":"rǎng","壤":"rǎng","饶":"ráo","扰":"rǎo","绕":"rào","惹":"rě","仁":"rén","忍":"rěn","扔":"rēng","仍":"réng","绒":"róng","荣":"róng","溶":"róng","熔":"róng","融":"róng","柔":"róu","儒":"rú","乳":"rǔ","辱":"rǔ","软":"ruǎn","锐":"ruì","瑞":"ruì","润":"rùn","若":"ruò","弱":"ruò","撒":"sā","洒":"sǎ","萨":"sà","塞":"sāi","赛":"sài","散":"sàn","桑":"sāng","嗓":"sǎng","丧":"sàng","扫":"sǎo","嫂":"sǎo","森":"sēn","僧":"sēng","杀":"shā","沙":"shā","纱":"shā","刹":"chà","砂":"shā","傻":"shǎ","啥":"shá","晒":"shài","杉":"shān","衫":"shān","珊":"shān","闪":"shǎn","陕":"shǎn","扇":"shàn","善":"shàn","商":"shāng","赏":"shǎng","尚":"shàng","梢":"shāo","烧":"shāo","稍":"shāo","绍":"shào","哨":"shào","舍":"shè","设":"shè","射":"shè","涉":"shè","摄":"shè","申":"shēn","伸":"shēn","审":"shěn","婶":"shěn","肾":"shèn","甚":"shèn","渗":"shèn","慎":"shèn","升":"shēng","牲":"shēng","胜":"shèng","绳":"shéng","省":"shěng","圣":"shèng","盛":"shèng","剩":"shèng","尸":"shī","施":"shī","狮":"shī","湿":"shī","拾":"shí","蚀":"shí","食":"shí","驶":"shǐ","氏":"shì","侍":"shì","势":"shì","试":"shì","饰":"shì","室":"shì","适":"shì","逝":"shì","释":"shì","守":"shǒu","寿":"shòu","兽":"shòu","售":"shòu","授":"shòu","瘦":"shòu","抒":"shū","叔":"shū","枢":"shū","殊":"shū","疏":"shū","舒":"shū","输":"shū","蔬":"shū","熟":"shú","暑":"shǔ","署":"shǔ","薯":"shǔ","束":"shù","述":"shù","竖":"shù","刷":"shuā","耍":"shuǎ","衰":"shuāi","摔":"shuāi","甩":"shuǎi","帅":"shuài","霜":"shuāng","爽":"shuǎng","税":"shuì","顺":"shùn","瞬":"shùn","丝":"sī","私":"sī","撕":"sī","寺":"sì","饲":"sì","松":"sōng","耸":"sǒng","宋":"sòng","颂":"sòng","搜":"sōu","艘":"sōu","苏":"sū","俗":"sú","肃":"sù","素":"sù","速":"sù","宿":"sù","塑":"sù","酸":"suān","蒜":"suàn","虽":"suī","髓":"suǐ","遂":"suì","碎":"suì","穗":"suì","孙":"sūn","损":"sǔn","笋":"sǔn","缩":"suō","索":"suǒ","锁":"suǒ","塌":"tā","塔":"tǎ","踏":"tà","胎":"tāi","抬":"tái","态":"tài","泰":"tài","贪":"tān","摊":"tān","滩":"tān","坛":"tán","潭":"tán","坦":"tǎn","叹":"tàn","炭":"tàn","探":"tàn","碳":"tàn","汤":"tāng","唐":"táng","堂":"táng","塘":"táng","躺":"tǎng","趟":"tàng","涛":"tāo","掏":"tāo","逃":"táo","桃":"táo","陶":"táo","淘":"táo","萄":"táo","讨":"tǎo","套":"tào","疼":"téng","腾":"téng","藤":"téng","梯":"tī","踢":"tī","啼":"tí","蹄":"tí","替":"tì","添":"tiān","田":"tián","甜":"tián","填":"tián","挑":"tiāo","贴":"tiē","铁":"tiě","厅":"tīng","廷":"tíng","亭":"tíng","庭":"tíng","停":"tíng","蜓":"tíng","挺":"tǐng","艇":"tǐng","桐":"tóng","铜":"tóng","童":"tóng","桶":"tǒng","筒":"tǒng","偷":"tōu","投":"tóu","透":"tòu","突":"tū","图":"tú","徒":"tú","涂":"tú","途":"tú","屠":"tú","土":"tǔ","吐":"tǔ","团":"tuán","推":"tuī","腿":"tuǐ","退":"tuì","吞":"tūn","托":"tuō","拖":"tuō","脱":"tuō","驼":"tuó","妥":"tuǒ","拓":"tuò","唾":"tuò","哇":"wā","娃":"wá","挖":"wā","蛙":"wā","瓦":"wǎ","歪":"wāi","弯":"wān","湾":"wān","丸":"wán","玩":"wán","顽":"wán","挽":"wǎn","汪":"wāng","亡":"wáng","网":"wǎng","忘":"wàng","旺":"wàng","危":"wēi","威":"wēi","微":"wēi","围":"wéi","违":"wéi","唯":"wéi","惟":"wéi","伟":"wěi","伪":"wěi","尾":"wěi","纬":"wěi","委":"wěi","萎":"wěi","卫":"wèi","味":"wèi","胃":"wèi","谓":"wèi","喂":"wèi","慰":"wèi","魏":"wèi","温":"wēn","纹":"wén","闻":"wén","蚊":"wén","吻":"wěn","稳":"wěn","翁":"wēng","窝":"wō","沃":"wò","卧":"wò","握":"wò","乌":"wū","污":"wū","吴":"wú","吾":"wú","午":"wǔ","伍":"wǔ","武":"wǔ","舞":"wǔ","务":"wù","误":"wù","悟":"wù","雾":"wù","夕":"xī","吸":"xī","析":"xī","息":"xī","牺":"xī","悉":"xī","惜":"xī","晰":"xī","稀":"xī","溪":"xī","锡":"xī","熙":"xī","嘻":"xī","膝":"xī","习":"xí","席":"xí","袭":"xí","媳":"xí","洗":"xǐ","戏":"xì","细":"xì","隙":"xì","虾":"xiā","瞎":"xiā","峡":"xiá","狭":"xiá","辖":"xiá","霞":"xiá","吓":"xià","厦":"shà","仙":"xiān","纤":"xiān","掀":"xiān","鲜":"xiān","闲":"xián","弦":"xián","贤":"xián","咸":"xián","衔":"xián","嫌":"xián","显":"xiǎn","险":"xiǎn","县":"xiàn","限":"xiàn","宪":"xiàn","陷":"xiàn","献":"xiàn","腺":"xiàn","乡":"xiāng","香":"xiāng","厢":"xiāng","湘":"xiāng","箱":"xiāng","详":"xiáng","祥":"xiáng","翔":"xiáng","享":"xiǎng","响":"xiǎng","巷":"xiàng","项":"xiàng","橡":"xiàng","削":"xiāo","萧":"xiāo","硝":"xiāo","销":"xiāo","晓":"xiǎo","孝":"xiào","效":"xiào","校":"xiào","歇":"xiē","协":"xié","胁":"xié","斜":"xié","谐":"xié","携":"xié","泄":"xiè","泻":"xiè","卸":"xiè","屑":"xiè","械":"xiè","谢":"xiè","蟹":"xiè","辛":"xīn","欣":"xīn","猩":"xīng","刑":"xíng","型":"xíng","醒":"xǐng","杏":"xìng","姓":"xìng","凶":"xiōng","兄":"xiōng","匈":"xiōng","胸":"xiōng","雄":"xióng","休":"xiū","修":"xiū","羞":"xiū","朽":"xiǔ","秀":"xiù","绣":"xiù","袖":"xiù","须":"xū","虚":"xū","徐":"xú","序":"xù","叙":"xù","畜":"chù","绪":"xù","续":"xù","嗅":"xiù","蓄":"xù","宣":"xuān","玄":"xuán","悬":"xuán","旋":"xuán","穴":"xué","血":"xuè","寻":"xún","巡":"xún","询":"xún","循":"xún","训":"xùn","讯":"xùn","迅":"xùn","压":"yā","呀":"ya","鸦":"yā","芽":"yá","崖":"yá","哑":"yǎ","雅":"yǎ","咽":"yàn","烟":"yān","淹":"yān","延":"yán","严":"yán","岩":"yán","沿":"yán","炎":"yán","研":"yán","盐":"yán","颜":"yán","衍":"yǎn","掩":"yǎn","厌":"yàn","宴":"yàn","艳":"yàn","验":"yàn","焰":"yàn","雁":"yàn","燕":"yàn","央":"yāng","扬":"yáng","阳":"yáng","杨":"yáng","洋":"yáng","仰":"yǎng","养":"yǎng","氧":"yǎng","痒":"yǎng","腰":"yāo","邀":"yāo","摇":"yáo","遥":"yáo","咬":"yǎo","药":"yào","耀":"yào","冶":"yě","野":"yě","页":"yè","液":"yè","伊":"yī","依":"yī","仪":"yí","夷":"yí","宜":"yí","姨":"yí","移":"yí","遗":"yí","疑":"yí","乙":"yǐ","矣":"yǐ","蚁":"yǐ","亿":"yì","忆":"yì","艺":"yì","议":"yì","亦":"yì","异":"yì","役":"yì","抑":"yì","译":"yì","易":"yì","疫":"yì","益":"yì","谊":"yì","逸":"yì","溢":"yì","毅":"yì","翼":"yì","阴":"yīn","吟":"yín","银":"yín","引":"yǐn","饮":"yǐn","蚓":"yǐn","隐":"yǐn","印":"yìn","婴":"yīng","鹰":"yīng","迎":"yíng","盈":"yíng","营":"yíng","蝇":"yíng","赢":"yíng","映":"yìng","硬":"yìng","哟":"yō","拥":"yōng","永":"yǒng","泳":"yǒng","勇":"yǒng","涌":"yǒng","优":"yōu","忧":"yōu","幽":"yōu","悠":"yōu","尤":"yóu","犹":"yóu","邮":"yóu","油":"yóu","游":"yóu","幼":"yòu","诱":"yòu","予":"yǔ","余":"yú","娱":"yú","渔":"yú","愉":"yú","愚":"yú","宇":"yǔ","羽":"yǔ","玉":"yù","吁":"xū","育":"yù","郁":"yù","狱":"yù","浴":"yù","预":"yù","域":"yù","欲":"yù","喻":"yù","寓":"yù","御":"yù","裕":"yù","遇":"yù","愈":"yù","誉":"yù","豫":"yù","园":"yuán","圆":"yuán","袁":"yuán","缘":"yuán","源":"yuán","怨":"yuàn","曰":"yuē","岳":"yuè","钥":"yào","悦":"yuè","阅":"yuè","跃":"yuè","匀":"yún","允":"yǔn","孕":"yùn","晕":"yūn","韵":"yùn","蕴":"yùn","杂":"zá","砸":"zá","灾":"zāi","栽":"zāi","宰":"zǎi","载":"zǎi","咱":"zán","暂":"zàn","赞":"zàn","脏":"zāng","葬":"zàng","遭":"zāo","糟":"zāo","枣":"zǎo","藻":"zǎo","灶":"zào","皂":"zào","噪":"zào","燥":"zào","躁":"zào","择":"zé","泽":"zé","责":"zé","贼":"zéi","增":"zēng","赠":"zèng","渣":"zhā","扎":"zhā","眨":"zhǎ","炸":"zhà","摘":"zhāi","宅":"zhái","窄":"zhǎi","债":"zhài","沾":"zhān","粘":"nián","展":"zhǎn","占":"zhàn","章":"zhāng","涨":"zhǎng","掌":"zhǎng","丈":"zhàng","仗":"zhàng","帐":"zhàng","胀":"zhàng","账":"zhàng","障":"zhàng","招":"zhāo","召":"zhào","兆":"zhào","赵":"zhào","罩":"zhào","遮":"zhē","折":"zhé","哲":"zhé","浙":"zhè","针":"zhēn","侦":"zhēn","珍":"zhēn","诊":"zhěn","枕":"zhěn","阵":"zhèn","振":"zhèn","镇":"zhèn","震":"zhèn","征":"zhēng","挣":"zhèng","睁":"zhēng","蒸":"zhēng","证":"zhèng","郑":"zhèng","政":"zhèng","症":"zhèng","支":"zhī","汁":"zhī","芝":"zhī","枝":"zhī","织":"zhī","肢":"zhī","脂":"zhī","蜘":"zhī","执":"zhí","值":"zhí","职":"zhí","植":"zhí","殖":"zhí","止":"zhǐ","旨":"zhǐ","址":"zhǐ","趾":"zhǐ","质":"zhì","致":"zhì","智":"zhì","置":"zhì","忠":"zhōng","肿":"zhǒng","仲":"zhòng","众":"zhòng","州":"zhōu","舟":"zhōu","洲":"zhōu","轴":"zhóu","宙":"zhòu","皱":"zhòu","骤":"zhòu","朱":"zhū","株":"zhū","珠":"zhū","诸":"zhū","猪":"zhū","蛛":"zhū","烛":"zhú","逐":"zhú","属":"shǔ","煮":"zhǔ","嘱":"zhǔ","助":"zhù","注":"zhù","贮":"zhù","驻":"zhù","柱":"zhù","祝":"zhù","著":"zhù","筑":"zhù","抓":"zhuā","爪":"zhuǎ","专":"zhuān","砖":"zhuān","赚":"zhuàn","庄":"zhuāng","桩":"zhuāng","壮":"zhuàng","状":"zhuàng","撞":"zhuàng","追":"zhuī","捉":"zhuō","桌":"zhuō","仔":"zǎi","兹":"zī","姿":"zī","资":"zī","滋":"zī","籽":"zǐ","宗":"zōng","综":"zōng","棕":"zōng","踪":"zōng","纵":"zòng","奏":"zòu","租":"zū","族":"zú","阻":"zǔ","组":"zǔ","祖":"zǔ","钻":"zuàn","嘴":"zuǐ","罪":"zuì","醉":"zuì","尊":"zūn","遵":"zūn","昨":"zuó","座":"zuò"};
+const EMOJI={"一":"1️⃣","二":"2️⃣","三":"3️⃣","四":"4️⃣","五":"5️⃣","六":"6️⃣","七":"7️⃣","八":"8️⃣","九":"9️⃣","十":"🔟","百":"💯","爸":"👨","妈":"👩","哥":"👦","姐":"👧","弟":"🧒","妹":"👶","爷":"👴","奶":"👵","人":"🧍","男":"🚹","女":"🚺","王":"👑","友":"🤝","天":"🌤️","日":"☀️","月":"🌙","星":"⭐","云":"☁️","雨":"🌧️","雪":"❄️","风":"🌬️","电":"⚡","水":"💧","火":"🔥","山":"⛰️","石":"🪨","木":"🌲","花":"🌷","草":"🌿","树":"🌳","叶":"🍃","竹":"🎍","海":"🌊","河":"🏞️","光":"✨","雷":"⛈️","鸟":"🐦","鸡":"🐔","鸭":"🦆","鹅":"🦢","鱼":"🐟","虫":"🐛","猫":"🐱","狗":"🐶","牛":"🐮","羊":"🐑","马":"🐴","兔":"🐰","虎":"🐯","鹿":"🦌","猴":"🐵","鼠":"🐭","象":"🐘","蛇":"🐍","熊":"🐻","目":"👁️","耳":"👂","口":"👄","手":"✋","足":"🦶","牙":"🦷","舌":"👅","心":"❤️","看":"👀","说":"💬","读":"📚","画":"🎨","唱":"🎤","哭":"😢","笑":"😀","吃":"🥢","喝":"🧃","跑":"🏃","走":"🚶","跳":"🦘","爬":"🐢","坐":"🧘","睡":"😴","打":"🥁","飞":"🕊️","门":"🚪","窗":"🪟","车":"🚗","船":"⛵","机":"✈️","伞":"☂️","包":"🎒","书":"📖","笔":"✏️","纸":"📄","灯":"💡","球":"⚽","杯":"🥛","碗":"🥣","刀":"🔪","勺":"🥄","椅":"🪑","床":"🛏️","衣":"👕","帽":"🧢","鞋":"👟","袜":"🧦","钟":"⏰","琴":"🎹","盒":"📦","家":"🏠","路":"🛣️","桥":"🌉","钱":"🧧","面":"🍜","饭":"🍚","菜":"🥬","肉":"🍖","蛋":"🥚","果":"🍎","瓜":"🍉","茶":"🍵","糖":"🍬","红":"🟥","黄":"🟨","蓝":"🟦","绿":"🟩","黑":"⬛","白":"⬜","紫":"🟪","快":"🏃","慢":"🐌","冷":"🥶","热":"🥵","好":"👍","上":"⬆️","下":"⬇️","左":"⬅️","右":"➡️","中":"🎯","年":"🧧","早":"🌅","晚":"🌆","夜":"🌃","春":"🌸","夏":"🏖️","秋":"🍁","冬":"⛄"};
+const WORDS={"一":"一个","二":"二十","三":"三个","四":"四个","五":"五个","六":"六个","七":"七个","八":"八个","九":"九个","十":"十个","百":"一百","千":"一千","爸":"爸爸","妈":"妈妈","哥":"哥哥","姐":"姐姐","弟":"弟弟","妹":"妹妹","爷":"爷爷","奶":"奶奶","人":"大人","男":"男孩","女":"女孩","王":"国王","我":"我们","你":"你好","他":"他们","友":"朋友","天":"天空","地":"大地","日":"日出","月":"月亮","星":"星星","云":"白云","雨":"下雨","雪":"下雪","风":"大风","电":"闪电","水":"喝水","火":"火苗","山":"大山","石":"石头","木":"木头","花":"红花","草":"小草","树":"大树","叶":"树叶","竹":"竹子","海":"大海","河":"小河","江":"长江","光":"阳光","雷":"雷声","鸟":"小鸟","鸡":"小鸡","鸭":"鸭子","鹅":"白鹅","鱼":"小鱼","虫":"虫子","猫":"小猫","狗":"小狗","牛":"水牛","羊":"小羊","马":"白马","兔":"兔子","虎":"老虎","鹿":"小鹿","猴":"猴子","鼠":"老鼠","象":"大象","龙":"恐龙","蛇":"小蛇","熊":"小熊","目":"目光","耳":"耳朵","口":"口水","手":"小手","足":"足球","牙":"牙齿","舌":"舌头","心":"爱心","头":"点头","皮":"皮球","看":"看见","听":"听话","说":"说话","读":"读书","写":"写字","画":"画画","唱":"唱歌","哭":"大哭","笑":"大笑","吃":"吃饭","喝":"喝水","跑":"跑步","走":"走路","跳":"跳高","爬":"爬山","坐":"坐好","睡":"睡觉","立":"起立","站":"车站","来":"过来","去":"回去","开":"开门","关":"关门","回":"回家","给":"给你","拿":"拿来","打":"打鼓","飞":"飞机","门":"大门","窗":"窗户","车":"汽车","船":"小船","机":"飞机","伞":"雨伞","包":"书包","书":"看书","笔":"铅笔","纸":"白纸","灯":"电灯","球":"皮球","杯":"水杯","碗":"小碗","刀":"小刀","勺":"勺子","椅":"椅子","床":"小床","被":"被子","衣":"衣服","帽":"帽子","鞋":"鞋子","袜":"袜子","钟":"闹钟","琴":"弹琴","盒":"盒子","家":"回家","屋":"小屋","路":"马路","桥":"小桥","钱":"压岁钱","米":"大米","面":"面条","饭":"米饭","菜":"青菜","肉":"牛肉","蛋":"鸡蛋","果":"苹果","瓜":"西瓜","茶":"喝茶","糖":"糖果","红":"红色","黄":"黄色","蓝":"蓝色","绿":"绿色","黑":"黑色","白":"白色","紫":"紫色","大":"大山","小":"小手","多":"许多","少":"多少","高":"高山","快":"飞快","慢":"慢慢","冷":"冰冷","热":"热水","好":"你好","美":"美丽","上":"上下","下":"上下","左":"左右","右":"左右","中":"中间","前":"前后","后":"前后","里":"家里","外":"门外","东":"东边","年":"过年","分":"分一分","早":"早上","晚":"晚上","夜":"黑夜","今":"今天","明":"明天","春":"春天","夏":"夏天","秋":"秋天","冬":"冬天"};
+const RELEASE_VERSION="1.2.2";</script>
+<script>
+"use strict";
+/* ================= 基础 ================= */
+var LK = ["qimeng","g1","g2","g3","g4"];
+var LM = {
+  qimeng:{n:"启蒙园", i:"🌱"},
+  g1:{n:"扩展字库一", i:"🎒"},
+  g2:{n:"扩展字库二", i:"📗"},
+  g3:{n:"扩展字库三", i:"📘"},
+  g4:{n:"扩展字库四", i:"🚀"}
+};
+var KEY = "hanziGame.v1";
+var storageIssue = "", isPaused = false;
+var DB = loadDB();
+function loadDB(){
+  var base = {stars:{}, level:"qimeng", pinyin:false, rate:0.8, shake:{}, limit:5, usagePreferenceVersion:1, today:null, batchSize:10, batchPreferenceVersion:3, stroke:false};
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return base;
+    var d = JSON.parse(raw);
+    if(!d || typeof d !== "object" || Array.isArray(d)) throw new Error("invalid record");
+    if(LK.indexOf(d.level) >= 0) base.level = d.level;
+    base.pinyin = d.pinyin === true;
+    base.stroke = d.stroke === true;
+    if(typeof d.rate === "number" && d.rate >= 0.6 && d.rate <= 1.2) base.rate = d.rate;
+    if([3,5,10].indexOf(d.limit) >= 0){
+      base.limit = d.limit === 3 && d.usagePreferenceVersion !== 1 ? 5 : d.limit;
+    }
+    if([5,10,15,20].indexOf(d.batchSize) >= 0) base.batchSize = d.batchSize;
+    if(d.stars && typeof d.stars === "object") Object.keys(d.stars).forEach(function(ch){
+      if(PINYIN[ch] && Number.isInteger(d.stars[ch]) && d.stars[ch] >= 1 && d.stars[ch] <= 3) base.stars[ch] = d.stars[ch];
+    });
+    if(d.shake && typeof d.shake === "object") Object.keys(d.shake).forEach(function(ch){
+      if(PINYIN[ch] && Number.isFinite(d.shake[ch]) && d.shake[ch] > 0) base.shake[ch] = d.shake[ch];
+    });
+    if(d.today && typeof d.today.date === "string" && Number.isInteger(d.today.rounds) && d.today.rounds >= 0) base.today = d.today;
+  }catch(e){ storageIssue = "记录不可读取，当前使用临时记录；不会自动覆盖原记录。请由家长检查浏览器存储。"; }
+  return base;
+}
+function save(){
+  if(storageIssue){ showStorageIssue(); return false; }
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); return true; }
+  catch(e){ storageIssue = "记录未能保存！当前进度仅在本次打开期间有效，关闭后可能丢失。"; showStorageIssue(); return false; }
+}
+function showStorageIssue(){
+  el("storage-status").textContent = storageIssue;
+  el("storage-status").classList.toggle("hidden", !storageIssue);
+}
+function el(id){ return document.getElementById(id); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function charsOf(l){ return (LEVELS[l]||"").split(""); }
+function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+var PRAISE = ["答对啦！","你真棒！","太厉害了！","哇，好聪明！","真棒呀！","好极了！","正确！"];
+var CHEER  = ["没关系，再想一想！","差一点点啦，再试试！","别着急，再看看！"];
+var BUBBLES = ["今天想学什么呀？","我们一起认字吧！","答对题目有星星哦！","嘟嘟陪你玩！","准备好了吗？","休息一下再来吧！"];
+var CONF_COLORS = ["#ff6b6b","#ffd93d","#6bcb77","#4d96ff","#ff8fab","#b983ff"];
+
+/* ================= 语音（PWA/浏览器优先用 speechSynthesis；APK 壳仍走 DuduNative） ================= */
+var voice = null;
+var speechUnlocked = false;
+function isAndroidOfflinePack(){
+  return !!(window.DuduNative && typeof window.DuduNative.speak === "function");
+}
+function isChineseVoiceEntry(v){
+  if(!v) return false;
+  if(/^zh\b/i.test(v.lang || "")) return true;
+  return /chinese|中文|汉|普通话|国语|zh[-_]?cn|zh[-_]?hans/i.test((v.name || "") + " " + (v.lang || ""));
+}
+function pickVoice(){
+  if(isAndroidOfflinePack()) return;
+  if(!("speechSynthesis" in window)) return;
+  var vs = speechSynthesis.getVoices() || [];
+  voice =
+    vs.filter(isChineseVoiceEntry)
+      .sort(function(a,b){ return (/CN|Xiaoxiao|Xiaoyi|Yaoyao|Huihui|Kangkang|Yunyang|普通话/i.test(a.name)?-1:0) - (/CN|Xiaoxiao|Xiaoyi|Yaoyao|Huihui|Kangkang|Yunyang|普通话/i.test(b.name)?-1:0); })[0] || null;
+}
+function unlockSpeech(){
+  if(speechUnlocked || isAndroidOfflinePack() || !("speechSynthesis" in window)) return;
+  speechUnlocked = true;
+  try{
+    speechSynthesis.cancel();
+    var warm = new SpeechSynthesisUtterance("。");
+    warm.lang = "zh-CN";
+    warm.volume = 0;
+    warm.rate = 1;
+    speechSynthesis.speak(warm);
+    speechSynthesis.cancel();
+  }catch(e){}
+  pickVoice();
+  if(active === "home") renderHome();
+}
+if("speechSynthesis" in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = function(){ pickVoice(); if(active==="home") renderHome(); };
+  document.addEventListener("pointerdown", unlockSpeech, { once: true, passive: true });
+  document.addEventListener("touchstart", unlockSpeech, { once: true, passive: true });
+  document.addEventListener("click", unlockSpeech, { once: true, passive: true });
+}
+function hasChineseVoice(){
+  if(isAndroidOfflinePack()){
+    try{ return !!window.DuduNative.hasChineseVoice(); }catch(e){ return false; }
+  }
+  if(!("speechSynthesis" in window)) return false;
+  var vs = speechSynthesis.getVoices() || [];
+  // Android Chrome 常在首次交互前 voices 为空；先允许试读，失败再降级看字找字
+  if(!vs.length) return true;
+  return vs.some(isChineseVoiceEntry);
+}
+function stopSpeak(){
+  if(isAndroidOfflinePack()){
+    try{ window.DuduNative.stop(); }catch(e){}
+    return;
+  }
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+}
+function markVoiceFallback(){
+  el("voice-tip").textContent = "本设备朗读未能播放。请家长点一下页面后再试「听一听」，并检查系统中文语音包；暂时可以玩看字找字。";
+  el("voice-tip").classList.remove("hidden");
+  if(active === "quiz" && quiz && !quiz.locked){
+    el("quiz-emoji").textContent = quiz.ch;
+    el("quiz-emoji").classList.remove("hidden");
+    el("quiz-question").textContent = "找出和上面一样的字（看字找字）";
+  }
+}
+function speak(text, opts){
+  if(isPaused || document.hidden) return;
+  opts = opts || {};
+  if(isAndroidOfflinePack()){
+    if(!hasChineseVoice()) return;
+    try{
+      window.DuduNative.speak(String(text), String(opts.rate != null ? opts.rate : DB.rate));
+    }catch(e){ markVoiceFallback(); }
+    return;
+  }
+  if(!("speechSynthesis" in window)) return;
+  unlockSpeech();
+  if(!hasChineseVoice()) return;
+  try{
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-CN";
+    u.rate = opts.rate || DB.rate;
+    u.pitch = opts.pitch != null ? opts.pitch : 1.1;
+    if(voice) u.voice = voice;
+    u.onerror = function(event){
+      if(isPaused || event.error === "canceled" || event.error === "interrupted") return;
+      markVoiceFallback();
+    };
+    speechSynthesis.speak(u);
+  }catch(e){ markVoiceFallback(); }
+}
+function sayChar(ch){
+  var w = WORDS[ch];
+  speak(w ? ch + "，" + w + "的" + ch : ch);
+}
+
+/* ================= 音效 ================= */
+var AC = null;
+function ac(){
+  if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(AC && AC.state === "suspended"){ try{ AC.resume(); }catch(e){} }
+  return AC;
+}
+function notes(list, dur, gap){
+  var c = ac(); if(!c) return;
+  var t = c.currentTime;
+  list.forEach(function(f){
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+    t += gap;
+  });
+}
+function sfxRight(){ notes([523.25,659.25,783.99,1046.5], 0.18, 0.09); }
+function sfxWrong(){ notes([233,196], 0.22, 0.14); }
+document.addEventListener("pointerdown", function(){ ac(); }, {once:true});
+
+/* ================= 彩带 ================= */
+function confetti(n){
+  n = n || 26;
+  var box = el("confetti");
+  for(var i=0;i<n;i++){
+    var p = document.createElement("i");
+    var s = 8 + Math.random()*10;
+    p.style.cssText = "left:"+(Math.random()*100)+"vw;width:"+s+"px;height:"+(s*0.6)+"px;background:"+rand(CONF_COLORS)+
+      ";animation-duration:"+(1+Math.random()*0.9)+"s;animation-delay:"+(Math.random()*0.25)+"s;transform:rotate("+(Math.random()*360)+"deg)";
+    box.appendChild(p);
+    (function(pp){ setTimeout(function(){ pp.remove(); }, 2400); })(p);
+  }
+}
+
+/* ================= 路由 ================= */
+var SCRS = ["home","learn","quiz","wall","set"];
+var active = "home";
+function go(name){
+  leavePause();
+  if(active === "quiz" && name !== "quiz"){
+    clearTimeout(quizTimer); clearTimeout(questionTimer); clearTimeout(feedbackTimer);
+    quiz = null;
+    stopSpeak();
+  }
+  active = name;
+  SCRS.forEach(function(s){ el("scr-"+s).classList.toggle("hidden", s !== name); });
+  if(name === "home") renderHome();
+  if(name === "set") renderSet();
+  if(name === "wall") renderWall();
+  window.scrollTo(0,0);
+}
+
+/* ================= 首页 ================= */
+function totalStars(){
+  var s = 0; for(var k in DB.stars) s += DB.stars[k];
+  return s;
+}
+function todayStr(){
+  var d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+function roundsToday(){
+  if(!DB.today || DB.today.date !== todayStr()) return 0;
+  return DB.today.rounds || 0;
+}
+function addRound(){
+  var t = (DB.today && DB.today.date === todayStr()) ? DB.today : {date:todayStr(), rounds:0};
+  t.rounds = (t.rounds||0) + 1;
+  DB.today = t; save();
+}
+function overLimit(){
+  return roundsToday() >= (DB.limit||5);
+}
+function learnedCount(l){ return charsOf(l).filter(function(c){ return DB.stars[c]; }).length; }
+function shakyPool(l){
+  return charsOf(l||DB.level).filter(function(c){ return DB.stars[c] > 0 && (DB.stars[c] < 3 || DB.shake[c]); });
+}
+
+function renderHome(){
+  var l = DB.level;
+  el("home-lvl").textContent = LM[l].i + " " + LM[l].n;
+  el("home-stars").textContent = "⭐ " + totalStars();
+  el("badge-learn").textContent = "";
+  el("badge-review").textContent = "";
+  el("bubble").textContent = overLimit() ? "今天的小游戏玩完啦，休息一下吧！" : rand(BUBBLES);
+  el("voice-tip").classList.toggle("hidden", hasChineseVoice());
+  showStorageIssue();
+}
+
+/* ================= 学一学 ================= */
+var batch = [], bi = 0;
+function startLearn(){
+  var todo = charsOf(DB.level).filter(function(c){ return !DB.stars[c]; });
+  el("learn-normal").classList.toggle("hidden", !todo.length);
+  el("learn-done").classList.toggle("hidden", !!todo.length);
+  if(!todo.length){ go("learn"); return; }
+  batch = todo.slice(0,DB.batchSize || 10); bi = 0;
+  go("learn"); showCard();
+}
+function showCard(){
+  var ch = batch[bi];
+  el("learn-progress").textContent = "第 " + (bi+1) + " / " + batch.length + " 个";
+  el("learn-emoji").textContent = EMOJI[ch] || "";
+  var hz = el("learn-hanzi");
+  hz.textContent = ch;
+  hz.classList.remove("pop"); void hz.offsetWidth; hz.classList.add("pop");
+  el("learn-pinyin").textContent = (DB.pinyin && PINYIN[ch]) ? PINYIN[ch] : "";
+  el("learn-word").textContent = WORDS[ch] ? "组词：" + WORDS[ch] : "";
+  showStroke(ch);
+  sayChar(ch);
+}
+function nextCard(){
+  if(bi < batch.length - 1){ bi++; showCard(); }
+  else startQuiz(batch.slice(), "afterLearn");
+}
+
+/* ---------- 笔顺：仅非离线包且家长开启时才尝试联网；离线 Android 包永久关闭 ---------- */
+var hwPromise = null, charDataCache = {};
+function strokeAllowed(){
+  return !isAndroidOfflinePack() && !!DB.stroke;
+}
+function hwLib(){
+  if(!hwPromise){
+    hwPromise = new Promise(function(res){
+      if(isAndroidOfflinePack() || !navigator.onLine){ res(false); return; }
+      var cdns = [
+        "https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js",
+        "https://registry.npmmirror.com/hanzi-writer/3.5.0/files/dist/hanzi-writer.min.js",
+        "https://unpkg.com/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"
+      ];
+      var i = 0, settled = false;
+      var next = function(){
+        if(settled) return;
+        if(i >= cdns.length){ settled = true; res(false); return; }
+        var s = document.createElement("script");
+        s.src = cdns[i++];
+        s.onload = function(){ if(window.HanziWriter){ settled = true; res(true); } else next(); };
+        s.onerror = next;
+        document.head.appendChild(s);
+        setTimeout(function(){ if(!window.HanziWriter) next(); }, 6000);
+      };
+      next();
+    });
+  }
+  return hwPromise;
+}
+function loadCharData(ch){
+  if(charDataCache[ch]) return Promise.resolve(charDataCache[ch]);
+  if(isAndroidOfflinePack()) return Promise.reject(new Error("offline pack"));
+  var urls = [
+    "https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/" + encodeURIComponent(ch) + ".json",
+    "https://registry.npmmirror.com/hanzi-writer-data/2.0/files/" + encodeURIComponent(ch) + ".json",
+    "https://unpkg.com/hanzi-writer-data@2.0/" + encodeURIComponent(ch) + ".json"
+  ];
+  var i = 0;
+  return new Promise(function(res, rej){
+    var next = function(){
+      if(i >= urls.length){ rej(new Error("no data")); return; }
+      fetch(urls[i++]).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+        .then(function(d){ charDataCache[ch] = d; res(d); })
+        .catch(next);
+    };
+    next();
+  });
+}
+function showStroke(ch){
+  var box = el("stroke-box");
+  box.classList.add("hidden"); box.innerHTML = "";
+  el("stroke-status").textContent = "";
+  if(!strokeAllowed()) return;
+  el("stroke-status").textContent = "笔顺资源加载中；不影响看字和游戏。";
+  hwLib().then(function(ok){
+    if(!ok || !window.HanziWriter){
+      if(active === "learn" && batch[bi] === ch) el("stroke-status").textContent = "笔顺暂不可用，可继续看字；下次联网再试。";
+      return;
+    }
+    if(active !== "learn" || batch[bi] !== ch || isPaused) return;
+    box.classList.remove("hidden");
+    box.innerHTML = "";
+    el("stroke-status").textContent = "仅供兴趣体验，不要求临摹。";
+    try{
+      var w = HanziWriter.create(box, ch, {
+        width:170, height:170, padding:8,
+        strokeAnimationSpeed:1.3, delayBetweenStrokes:180,
+        showOutline:true, charDataLoader: loadCharData,
+        onLoadCharDataError: function(){ box.classList.add("hidden"); el("stroke-status").textContent = "此字笔顺暂未加载，可继续看字和游戏。"; }
+      });
+      w.animateCharacter();
+      box.onclick = function(){ try{ w.animateCharacter(); }catch(e){} };
+    }catch(e){ box.classList.add("hidden"); }
+  });
+}
+
+/* ================= 玩游戏 ================= */
+var quiz = null;
+var quizTimer = null, questionTimer = null, feedbackTimer = null;
+function playPool(){
+  var learned = charsOf(DB.level).filter(function(c){ return DB.stars[c] > 0; });
+  if(learned.length < 1) return null;
+  return learned.map(function(c){
+    return { c:c, w:(DB.shake[c] ? 100 : 0) + (3 - DB.stars[c]) * 10 + Math.random() * 20 };
+  }).sort(function(a,b){ return b.w - a.w; }).slice(0,8).map(function(o){ return o.c; });
+}
+function startQuiz(pool, mode){
+  if(!pool || !pool.length || overLimit()) return;
+  clearTimeout(quizTimer); clearTimeout(questionTimer); clearTimeout(feedbackTimer);
+  quiz = { pool: shuffle(pool), mode: mode, i: 0, firstTry: true, earned: 0, streak: 0, locked: false, finished: false };
+  quiz.total = mode === "afterLearn" ? pool.length : Math.min(8, pool.length);
+  quiz.pool = quiz.pool.slice(0, quiz.total);
+  el("scr-quiz").classList.remove("done");
+  el("quiz-result").classList.add("hidden");
+  go("quiz");
+  nextQ();
+}
+function nextQ(){
+  if(isPaused || !quiz || active !== "quiz" || quiz.finished) return;
+  clearTimeout(questionTimer); clearTimeout(feedbackTimer);
+  var ch = quiz.pool[quiz.i];
+  quiz.ch = ch; quiz.firstTry = true; quiz.locked = false;
+  var lvChars = charsOf(DB.level);
+  var sameSound = function(c){ return PINYIN[c] === PINYIN[ch]; };
+  var distr;
+  if(quiz.mode === "afterLearn"){
+    distr = shuffle(quiz.pool.filter(function(c){ return c !== ch && !sameSound(c); })).slice(0,3);
+    if(distr.length < 3){
+      distr = distr.concat(shuffle(lvChars.filter(function(c){ return c !== ch && !sameSound(c) && distr.indexOf(c) < 0; })).slice(0, 3 - distr.length));
+    }
+  }else{
+    distr = shuffle(lvChars.filter(function(c){ return c !== ch && !sameSound(c); })).slice(0,3);
+  }
+  var opts = shuffle([ch].concat(distr));
+  var dots = "";
+  for(var k=0;k<quiz.total;k++){
+    dots += '<i class="' + (k < quiz.i ? "done" : (k === quiz.i ? "cur" : "")) + '"></i>';
+  }
+  el("quiz-dots").innerHTML = dots;
+  var visual = !hasChineseVoice();
+  var pic = !visual && !!EMOJI[ch] && Math.random() < 0.55;
+  el("quiz-emoji").classList.toggle("hidden", !pic && !visual);
+  el("quiz-emoji").textContent = visual ? ch : (pic ? EMOJI[ch] : "");
+  el("quiz-question").textContent = visual ? "找出和上面一样的字（看字找字）" : (pic ? "看图找字：哪个字是它？" : "听一听，是哪个字？");
+  var box = el("quiz-opts");
+  box.innerHTML = "";
+  opts.forEach(function(o){
+    var b = document.createElement("button");
+    b.className = "opt"; b.textContent = o;
+    b.onclick = function(){ pickOpt(o, b); };
+    box.appendChild(b);
+  });
+  questionTimer = setTimeout(function(){
+    if(!quiz || active !== "quiz" || quiz.locked || quiz.ch !== ch) return;
+    if(quiz.i === 0){
+      var ask = el("quiz-emoji").classList.contains("hidden") ? "听一听，是哪个字。" : "看图找字，哪个字是它。";
+      speak(ask + " " + ch);
+    } else speak(ch);
+  }, 350);
+}
+function pickOpt(o, btn){
+  if(isPaused || !quiz || active !== "quiz" || quiz.locked || btn.disabled) return;
+  clearTimeout(questionTimer); clearTimeout(feedbackTimer);
+  if(o === quiz.ch){
+    quiz.locked = true;
+    el("quiz-opts").querySelectorAll("button").forEach(function(b){ b.disabled = true; });
+    speak(o, {rate: Math.max(DB.rate, 0.9)});
+    btn.classList.add("right");
+    sfxRight();
+    quiz.streak = (quiz.streak||0) + 1;
+    if(quiz.streak >= 2) confetti(24);
+    if(quiz.firstTry){
+      DB.stars[o] = Math.min(3, (DB.stars[o]||0) + 1);
+      delete DB.shake[o];
+      quiz.earned++;
+    }else if(!DB.stars[o]){
+      DB.stars[o] = 1;
+    }
+    save();
+    quiz.i++;
+    if(quiz.i >= quiz.total){ quizTimer = setTimeout(endRound, 900); }
+    else quizTimer = setTimeout(nextQ, 1000);
+  }else{
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    quiz.firstTry = false;
+    quiz.streak = 0;
+    DB.shake[quiz.ch] = Date.now();
+    save();
+    sfxWrong();
+    feedbackTimer = setTimeout(function(){
+      if(quiz && active === "quiz" && !quiz.locked) speak(rand(CHEER));
+    }, 900);
+  }
+}
+function endRound(){
+  if(isPaused || !quiz || active !== "quiz" || quiz.finished) return;
+  quiz.finished = true;
+  addRound();
+  var limited = overLimit();
+  el("scr-quiz").classList.add("done");
+  el("quiz-opts").innerHTML = "";
+  el("quiz-emoji").classList.add("hidden");
+  el("result-face").textContent = quiz.earned === quiz.total ? "🏆" : (quiz.earned > 0 ? "🎉" : "💪");
+  el("result-title").textContent =
+    quiz.earned === quiz.total ? "谢谢你一起玩！" : (quiz.earned > 0 ? "这次有新的发现！" : "谢谢你认真尝试！");
+  var st = ""; for(var i=0;i<quiz.earned;i++) st += "<span>⭐</span>";
+  el("result-stars").innerHTML = st;
+  el("result-again").classList.toggle("hidden", quiz.mode === "afterLearn" || limited);
+  var tip = el("result-rest");
+  if(limited){
+    tip.textContent = "今天的小游戏玩完啦，休息一下，和爸爸妈妈说说你认识的字吧！";
+    tip.classList.remove("hidden");
+  }else if(quiz.mode === "afterLearn"){
+    tip.textContent = "今天一起看了 " + quiz.total + " 个字，去家里找找它们藏在哪里吧！";
+    tip.classList.remove("hidden");
+  }else{
+    tip.classList.add("hidden");
+  }
+  el("quiz-result").classList.remove("hidden");
+  if(!limited) confetti(50);
+  speak(rand(PRAISE));
+}
+
+/* ================= 成果墙 ================= */
+function renderWall(){
+  var l = DB.level, chs = charsOf(l);
+  var learned = learnedCount(l);
+  el("wall-title").textContent = LM[l].i + " " + LM[l].n;
+  el("wall-count").textContent = "体验过 " + learned + " / " + chs.length + " 个字";
+  el("wall-bar").style.width = (100 * learned / Math.max(1, chs.length)) + "%";
+  el("wall-done").classList.toggle("hidden", learned !== chs.length);
+  var g = el("wall-grid");
+  var html = "";
+  chs.forEach(function(ch){
+    var s = DB.stars[ch] || 0;
+    if(s){
+      html += '<div class="cell on" title="' + (PINYIN[ch]||"") + '"><b>' + ch + '</b><span>' + "⭐".repeat(s) + '</span></div>';
+    }else{
+      html += '<div class="cell"><b>？</b><span></span></div>';
+    }
+  });
+  g.innerHTML = html;
+  g.querySelectorAll(".cell.on").forEach(function(d){
+    d.onclick = function(){
+      var ch = d.querySelector("b").textContent;
+      sayChar(ch);
+      d.classList.remove("pop"); void d.offsetWidth; d.classList.add("pop");
+    };
+  });
+}
+
+/* ================= 家长设置 ================= */
+function renderSet(){
+  var list = el("lvl-list");
+  list.innerHTML = "";
+  LK.forEach(function(k){
+    var chs = charsOf(k);
+    var b = document.createElement("button");
+    b.className = "lvl-opt" + (DB.level === k ? " sel" : "");
+    b.innerHTML = '<span class="li">' + LM[k].i + '</span><span class="ln">' + LM[k].n + '</span><span class="lp">体验过 ' + learnedCount(k) + '/' + chs.length + '</span>';
+    b.onclick = function(){ DB.level = k; save(); renderSet(); };
+    list.appendChild(b);
+  });
+  el("opt-batch").value = String(DB.batchSize || 10);
+  el("opt-stroke").checked = DB.stroke;
+  showStorageIssue();
+  el("opt-pinyin").checked = DB.pinyin;
+  el("opt-rate").value = DB.rate;
+  el("opt-limit").value = String(DB.limit || 5);
+  el("set-limit-n").textContent = DB.limit || 5;
+  el("set-rounds").textContent = roundsToday();
+  el("set-review-info").textContent = "当前字库可回顾 " + shakyPool().length + " 个字（星星仅记录游戏，不能代表掌握）";
+}
+
+/* ================= 事件绑定 ================= */
+el("btn-learn").onclick = function(){
+  if(overLimit()){ el("bubble").textContent = "今天的小游戏玩完啦，休息一下吧！"; return; }
+  startLearn();
+};
+el("btn-play").onclick = function(){
+  if(overLimit()){ el("bubble").textContent = "今天玩得够多啦，休息一下，和爸爸妈妈说说认识的字吧！"; return; }
+  var p = playPool();
+  if(!p){ el("bubble").textContent = "先去认几个新字，再来玩吧！"; sfxWrong(); return; }
+  startQuiz(p, "round");
+};
+el("btn-review").onclick = function(){
+  if(overLimit()){ el("bubble").textContent = "今天玩得够多啦，休息一下，和爸爸妈妈说说认识的字吧！"; return; }
+  var p = shakyPool();
+  if(!p.length){ el("bubble").textContent = "暂时没有安排复习的字，可以回到生活里找找。"; return; }
+  startQuiz(p, "review");
+};
+el("btn-wall").onclick = function(){ go("wall"); };
+var setHold = null;
+el("btn-set").addEventListener("pointerdown", function(){
+  this.classList.add("gear-hold");
+  setHold = setTimeout(function(){ setHold = null; ac(); go("set"); }, 3000);
+});
+["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+  el("btn-set").addEventListener(ev, function(){
+    this.classList.remove("gear-hold");
+    if(setHold){
+      clearTimeout(setHold); setHold = null;
+      el("bubble").textContent = "这是爸爸妈妈的长按按钮哦";
+    }
+  });
+});
+el("learn-home").onclick = function(){ go("home"); };
+el("quiz-home").onclick = function(){ go("home"); };
+el("wall-home").onclick = function(){ go("home"); };
+el("set-home").onclick = function(){ go("home"); };
+el("btn-replay").onclick = function(){ sayChar(batch[bi]); };
+el("btn-next").onclick = nextCard;
+el("learn-hanzi").onclick = function(){ sayChar(batch[bi]); var hz = el("learn-hanzi"); hz.classList.remove("pop"); void hz.offsetWidth; hz.classList.add("pop"); };
+el("done-home").onclick = function(){ go("home"); };
+el("done-play").onclick = function(){
+  var p = playPool();
+  if(p) startQuiz(p, "round"); else go("home");
+};
+el("quiz-audio").onclick = function(){ if(quiz) speak(quiz.ch); };
+el("result-home").onclick = function(){ go("home"); };
+el("result-again").onclick = function(){
+  if(overLimit()){ go("home"); return; }
+  if(quiz.mode === "review"){
+    var p = shakyPool();
+    if(p.length){ startQuiz(p, "review"); return; }
+  }else{
+    var p2 = playPool();
+    if(p2){ startQuiz(p2, "round"); return; }
+  }
+  go("home");
+};
+el("opt-pinyin").onchange = function(){ DB.pinyin = this.checked; save(); };
+el("opt-rate").oninput = function(){ DB.rate = parseFloat(this.value) || 0.8; save(); };
+el("opt-limit").onchange = function(){
+  var n = parseInt(this.value, 10);
+  DB.limit = [3,5,10].indexOf(n) >= 0 ? n : 5;
+  DB.usagePreferenceVersion = 1;
+  save(); renderSet();
+};
+el("opt-reset-today").onclick = function(){
+  DB.today = { date: todayStr(), rounds: 0 };
+  save(); renderSet();
+};
+el("opt-test").onclick = function(){ speak("你好，我是嘟嘟，我们一起认字吧！"); };
+el("opt-reset").onclick = function(){
+  if(confirm("确定要清空全部学习记录吗？此操作无法恢复。") && confirm("再次确认：真的要清空吗？")){
+    try { localStorage.removeItem(KEY); storageIssue=""; } catch(e) { alert("无法清除存储，请检查浏览器设置。"); return; }
+    DB = loadDB();
+    renderSet();
+    alert("已清空。");
+  }
+};
+
+var appRegistration = null;
+function updateReleaseStatus(text){ el('release-status').textContent = text; }
+function applyAndroidOfflineUi(){
+  if(!isAndroidOfflinePack()) return;
+  DB.stroke = false;
+  try{ el('opt-stroke').checked = false; }catch(e){}
+  el('set-stroke-block').classList.add('hidden');
+  el('check-update').classList.add('hidden');
+  el('set-foot').textContent = '离线安装包：字卡、游戏与记录均在本机；不访问外网。朗读使用系统中文语音引擎（若未安装语音包则自动改为看字找字）。清数据或卸载后记录可能丢失。';
+  updateReleaseStatus('Android 离线安装包 · 版本 ' + RELEASE_VERSION + '。无外网更新；换版本请安装新的 APK。');
+  try{ save(); }catch(e){}
+}
+function registerRelease(){
+  if(isAndroidOfflinePack()){
+    applyAndroidOfflineUi();
+    return;
+  }
+  if(!('serviceWorker' in navigator) || !window.isSecureContext || location.protocol === 'file:'){
+    updateReleaseStatus('本地文件预览无法安装到桌面。请用手机 Chrome 打开 HTTPS 发布地址，再「添加到主屏幕」。当前版本 ' + RELEASE_VERSION + '。');
+    return;
+  }
+  navigator.serviceWorker.register('./sw.js').then(function(reg){
+    appRegistration = reg;
+    function status(){
+      updateReleaseStatus(reg.waiting ? '有新版本可用。由家长点击检查更新，确认后重新打开。' : '版本 ' + RELEASE_VERSION + '；离线资源准备中，尚未确认可离线。');
+      if(!reg.waiting) navigator.serviceWorker.ready.then(function(){
+        caches.open('dudu-shizi-' + RELEASE_VERSION).then(function(cache){return cache.match('./index.html');}).then(function(cached){
+          if(cached) updateReleaseStatus('版本 ' + RELEASE_VERSION + '；核心页面已缓存。朗读依赖系统普通话语音，笔顺另需联网。');
+        }).catch(function(){updateReleaseStatus('无法确认离线缓存，请联网检查后再使用。');});
+      });
+    }
+    status();
+    reg.addEventListener('updatefound', function(){
+      var worker=reg.installing;
+      if(worker) worker.addEventListener('statechange',function(){if(worker.state==='installed') status();});
+    });
+  }).catch(function(){updateReleaseStatus('离线缓存注册失败；当前仅在线可用，请家长检查 HTTPS 与网络。');});
+}
+function pauseActivity(){
+  clearTimeout(quizTimer); clearTimeout(questionTimer); clearTimeout(feedbackTimer);
+  clearTimeout(setHold); setHold=null;
+  el('btn-set').classList.remove('gear-hold');
+  stopSpeak();
+  if(AC && AC.state==='running') AC.suspend();
+  save();
+  if(active==='learn' || active==='quiz'){
+    isPaused=true;
+    document.body.classList.add('paused');
+    el('pause-cover').classList.remove('hidden');
+  }
+}
+function leavePause(){
+  isPaused=false;
+  document.body.classList.remove('paused');
+  el('pause-cover').classList.add('hidden');
+}
+function resumeActivity(){
+  leavePause();
+  if(AC && AC.state==='suspended') AC.resume();
+  if(active==='quiz' && quiz && quiz.locked && !quiz.finished){
+    if(quiz.i >= quiz.total) endRound(); else nextQ();
+  }
+}
+document.addEventListener('visibilitychange',function(){ if(document.hidden) pauseActivity(); });
+window.addEventListener('pagehide', pauseActivity);
+el('resume-play').onclick=resumeActivity;
+el('learn-pause').onclick=pauseActivity;
+el('quiz-pause').onclick=pauseActivity;
+el('pause-home').onclick=function(){leavePause();go('home');};
+el('opt-batch').onchange=function(){
+  var n=parseInt(this.value,10);
+  DB.batchSize=[5,10,15,20].indexOf(n)>=0?n:10;
+  DB.batchPreferenceVersion=3;
+  save();
+};
+el('opt-stroke').onchange=function(){
+  if(isAndroidOfflinePack()){ this.checked=false; DB.stroke=false; save(); return; }
+  DB.stroke=this.checked;save();
+};
+el('check-update').onclick=function(){
+  if(isAndroidOfflinePack()){ updateReleaseStatus('离线安装包不检查外网更新。'); return; }
+  if(!appRegistration){updateReleaseStatus('未连接可更新的 PWA 服务，无法检查在线更新。');return;}
+  appRegistration.update().then(function(){
+    if(appRegistration.waiting && confirm('发现新版本。现在更新会回到首页，已保存记录保留。是否更新？')){
+      pauseActivity();
+      navigator.serviceWorker.addEventListener('controllerchange',function(){location.reload();},{once:true});
+      appRegistration.waiting.postMessage({type:'ACTIVATE_UPDATE'});
+    }else if(!appRegistration.waiting) updateReleaseStatus('检查完成；暂未发现可立即应用的新版本。若正在下载，请稍后再检查。');
+  }).catch(function(){updateReleaseStatus('检查失败，已缓存版本仍可使用。请联网后重试。');});
+};
+
+/* ================= 启动 ================= */
+window.pauseActivity = pauseActivity;
+window.markVoiceFallback = markVoiceFallback;
+window.__duduBack = function(){
+  if(active !== "home"){ go("home"); return true; }
+  return false;
+};
+go("home");
+registerRelease();
+if(isAndroidOfflinePack()){
+  window.__duduNativeReady = function(){ applyAndroidOfflineUi(); if(active==="home") renderHome(); };
+  try{ if(window.DuduNative && DuduNative.hasChineseVoice) applyAndroidOfflineUi(); }catch(e){}
+}
+</script>
+</body>
+</html>

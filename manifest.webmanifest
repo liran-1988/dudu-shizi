@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "嘟嘟识字",
+  "short_name": "嘟嘟识字",
+  "description": "亲子陪伴的汉字兴趣小游戏，练习记录不等同于掌握。PWA：HTTPS 打开后可添加到主屏幕，进度本机保存，家长确认后更新。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffefc9",
+  "theme_color": "#ffefc9",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
