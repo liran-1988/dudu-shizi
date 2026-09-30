@@ -2,7 +2,7 @@
   "id": "./",
   "name": "嘟嘟识字",
   "short_name": "嘟嘟识字",
-  "description": "亲子陪伴的汉字兴趣小游戏。PWA 部署；手机请先点「点我开声音」。",
+  "description": "亲子汉字小游戏。手机朗读改用联网音频。",
   "lang": "zh-CN",
   "start_url": "./index.html",
   "scope": "./",

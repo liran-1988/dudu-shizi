@@ -1,19 +1,19 @@
 {
-  "version": "1.2.3",
-  "status": "pwa-candidate-awaiting-https-deploy",
+  "version": "1.2.4",
+  "status": "pwa-live",
   "channel": "pwa",
   "files": {
     "index.html": {
-      "bytes": 97999,
-      "sha256": "89110f7d02c10e422948760b7c0231f58e3524f2e027f7b5a0deb7abc0e7d63d"
+      "bytes": 99349,
+      "sha256": "0a7b8e15679f6d3f6da3045a0ea23d208bebbb3166a9ca776c47d1d1609bbf11"
     },
     "manifest.webmanifest": {
-      "bytes": 625,
-      "sha256": "9d1cebace524f3e33999dce4293c50b33c35974b29b4a0f528816507de354653"
+      "bytes": 591,
+      "sha256": "cb0077e754bdb68f25e2b65c699107056ce1650615703965d01ab790bc45f302"
     },
     "sw.js": {
       "bytes": 1193,
-      "sha256": "ada4d7a7250e147c83f0261c63e0b7f1a466cfc2a045c1fb9d59388afc72df1a"
+      "sha256": "15a14974df6ac9d0f38e4b4925213237e31a49573e8d561c666b54da2895fd64"
     },
     "icons/icon-180.png": {
       "bytes": 1013,
