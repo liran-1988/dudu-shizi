@@ -1,19 +1,19 @@
 {
-  "version": "1.2.4",
-  "status": "pwa-live",
+  "version": "1.4.0",
+  "status": "pwa-ready-to-upload",
   "channel": "pwa",
   "files": {
     "index.html": {
-      "bytes": 99349,
-      "sha256": "0a7b8e15679f6d3f6da3045a0ea23d208bebbb3166a9ca776c47d1d1609bbf11"
+      "bytes": 593819,
+      "sha256": "c5de3a8c098b5ba122fa24004e9cf51dfc9a27ccf044f5ef31f2396ec3f90aac"
     },
     "manifest.webmanifest": {
-      "bytes": 591,
-      "sha256": "cb0077e754bdb68f25e2b65c699107056ce1650615703965d01ab790bc45f302"
+      "bytes": 615,
+      "sha256": "43bb02daa79b3cab4a666259fb706a94e52b02544d976a6d198c597b61be1d75"
     },
     "sw.js": {
       "bytes": 1193,
-      "sha256": "15a14974df6ac9d0f38e4b4925213237e31a49573e8d561c666b54da2895fd64"
+      "sha256": "ab923ab5e003582a19aa79d6461dcc834a35857e91dc3377c604ffe635c861fa"
     },
     "icons/icon-180.png": {
       "bytes": 1013,
@@ -27,17 +27,37 @@
       "bytes": 5356,
       "sha256": "d32b1d66a1e95d7a34fc8dd639924276b69f30259273eac32b13f5827e95a804"
     },
+    ".nojekyll": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
     "发布说明.md": {
-      "bytes": 3667,
-      "sha256": "0f2524aefd8eb51f6eef1508f9f764001cb4ed49a7b0ace58bc6a1e3f97e9033"
+      "bytes": 4177,
+      "sha256": "f1fdf86a7c0db6534121c1765b6e23c53720d18b7cde1f8ee6dbe2ae88c811c6"
     },
     "说明.md": {
-      "bytes": 1278,
-      "sha256": "58883518bb8e7e3546850055c92863ed383f092f49bdb11855694df9050963f0"
+      "bytes": 3079,
+      "sha256": "a0db286db7ee0cd3afcdaab41fdc76d2baf8ac8bd00edea70d8adcfa2489c401"
     },
     "移动发布审核与验收-1.1.2.md": {
       "bytes": 10176,
       "sha256": "6a3948ac9fcb536065d9a9014d93c43ecf2f5b3b7a9f1db1a89fcda0b8e9d952"
+    },
+    "版本说明-1.4.0.md": {
+      "bytes": 3254,
+      "sha256": "3e36945dc3cb42036e8f61fca324504734802b7c11907bb896abb3e762354dff"
+    },
+    "成长分级方案.md": {
+      "bytes": 6143,
+      "sha256": "d200ebf65f6ece0834be11f371a066045785dbe04da0d2d3aef25e71a70995b9"
+    },
+    "成长阶段完整字表.md": {
+      "bytes": 14138,
+      "sha256": "581d5c0091565361b04a1a2f35c715dfacfbd9157a9783fa6dafc7a8bf12bf69"
+    },
+    "成长字词例句.csv": {
+      "bytes": 294861,
+      "sha256": "01f41479f0353d63c1cbc73cce5ac4eda7f0ecd636707cfe836e452e6756d1e7"
     }
   }
 }
